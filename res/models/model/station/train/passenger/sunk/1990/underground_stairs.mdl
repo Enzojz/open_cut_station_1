@@ -1,0 +1,92 @@
+local laneutil = require "laneutil"
+local vec3 = require "vec3"
+local transf = require "transf"
+
+local laneWidth = 2.4
+local laneX = 1.5
+
+function data()
+    return {
+            
+            collider = {
+                params = {
+                
+                },
+                type = "MESH",
+            
+            },
+            lods = {
+                {
+                    animations = {
+                    
+                    },
+                    children = {
+                        {
+                            id = "station/train/passenger/1990/lod_0_perron_end_streetconnection.msh",
+                            transf = {
+                                1, 0, 0, 0,
+                                0, 1.1, 0, 0,
+                                0, 0, 1, 0,
+                                0, 0, -0.8, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                    
+                    },
+                    events = {
+                    
+                    },
+                    matConfigs = {
+                        {
+                            0, 0, 0,
+                        },
+                    },
+                    static = false,
+                    visibleFrom = 0,
+                    visibleTo = 1200,
+                
+                },
+            },
+            metadata = {
+                transportNetworkProvider = {
+                    laneLists = {
+                        {
+                            transportModes = {"PERSON"},
+                            nodes = laneutil.makeLanes({
+                                    -- downstairs
+                                    {{0.0, 7, 0.3}, {0.0, 9, 0.3}, {0.0, 8.5, .0}, {0.0, 8.5, .0}, laneWidth},
+                                    {{0.0, 9, 0.3}, {0.0, 15, -5.0}, {0.0, 9.25, .0}, {0.0, 1, -1}, laneWidth},
+                                    
+                                    {{0.0, -7, 0.3}, {0.0, -9, 0.3}, {0.0, -8.5, .0}, {0.0, -8.5, .0}, laneWidth},
+                                    {{0.0, -9, 0.3}, {0.0, -15, -5.0}, {0.0, -9.25, .0}, {0.0, -1, -1}, laneWidth},
+                                    
+                                    {{0, -15, -5}, {0, -7.5, -5}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    {{0, 15, -5}, {0, 7.5, -5}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+                                    
+                                    {{0, -15, -5}, {0, -7.5, -10}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    {{0, 15, -5}, {0, 7.5, -10}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+                                    
+                                    {{0, -15, -5}, {0, -7.5, -15}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    {{0, 15, -5}, {0, 7.5, -15}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+                                    
+                                    {{0, -15, -5}, {0, -7.5, -20}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    {{0, 15, -5}, {0, 7.5, -20}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+                                    
+                                    {{0, -15, -5}, {0, -7.5, -25}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    {{0, 15, -5}, {0, 7.5, -25}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+
+                                    -- {{0, -15, -5}, {0, -7.5, -30}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    -- {{0, 15, -5}, {0, 7.5, -30}, {0, -1, 0}, {0, -1, 0}, laneWidth},
+                                    
+                                    -- {{0, -15, -5}, {0, -7.5, -35}, {0, 1, 0}, {0, 1, 0}, laneWidth},
+                                    -- {{0, 15, -5}, {0, 7.5, -35}, {0, -1, 0}, {0, -1, 0}, laneWidth}
+                            
+                            })
+                        }
+                    },
+                }
+            }
+    
+    }
+end

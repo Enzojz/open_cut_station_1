@@ -1,0 +1,111 @@
+local coor = require("coor")
+local func = require("func")
+
+local wallSegs = {1, 2, 3, 4, 5}
+local wallLength = 20
+local wallHeight = {5, 7.5, 10, 12.5, 15, 17.5, 20}
+
+local newModel = function(m, ...)
+    return {
+        id = m,
+        transf = coor.mul(...)
+    }
+end
+
+
+function data()
+    
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("Miscellaneous"),
+            description = _("Ramp Protector")
+        },
+        availability = {
+            yearFrom = 1950
+        },
+        buildMode = "MULTI",
+        categories = {"misc"},
+        order = 100,
+        skipCollision = false,
+        autoRemovable = false,
+        
+        params = {
+            {
+                key = "wallLength",
+                name = _("Length of Wall") .. "(m)",
+                values = func.map(wallSegs, function(n) return tostring(n * wallLength) end),
+            },
+            {
+                key = "wallHeight",
+                name = _("Wall height") .. "(m)",
+                values = func.map(wallHeight, tostring),
+                defaultIndex = 2
+            },
+        },
+        
+        updateFn = function(params)
+            local result = {}
+            
+            local height = wallHeight[params.wallHeight + 1]
+            local nSeg = wallSegs[params.wallLength + 1]
+            local mSeg = math.ceil(height / 10)
+            local zDisp = height - mSeg * 10
+            local totalLength = wallLength * nSeg
+            
+            result.models =
+                func.mapFlatten(func.seq(0, mSeg - 1), function(m) return
+                    func.seqMap({1, nSeg}, function(n)
+                        return newModel("station/train/passenger/sunk/sunk_side_wall.mdl",
+                            coor.xXY(), coor.transY(-5), coor.transX((n - 0.5) * wallLength - 0.5 * totalLength), coor.transZ(zDisp + m * 10)
+                    )
+                    end)
+                end)
+            
+            local extWidth = 2 * height
+            local slopeExt = height / (extWidth - 6)
+            local yMin = - totalLength * 0.5
+            local yMax = totalLength + yMin
+            result.terrainAlignmentLists = {
+                {
+                    type = "GREATER",
+                    faces = {{
+                        {yMin, -5, height},
+                        {yMin, -extWidth, height},
+                        {yMax, -extWidth, height},
+                        {yMax, -5, height},
+                    },
+                    {
+                        {yMax, -5, height},
+                        {yMax, -extWidth, height},
+                        {yMax + extWidth - 6, -extWidth, 0},
+                        {yMax + extWidth - 6, -5, 0},
+                    },
+                    {
+                        {yMin - extWidth + 6, -5, 0},
+                        {yMin - extWidth + 6, -extWidth, 0},
+                        {yMin, -extWidth, height},
+                        {yMin, -5, height},
+                    }},
+                    slopeLow = 0,
+                    slopeHigh = 0,
+                },
+                {
+                    type = "GREATER",
+                    faces = {{
+                        {yMin, -extWidth, height},
+                        {yMin, -extWidth - 1, height},
+                        {yMax, -extWidth - 1, height},
+                        {yMax, -extWidth, height},
+                    },
+                    },
+                    slopeLow = slopeExt,
+                    slopeHigh = slopeExt,
+                },
+            }
+            
+            return result
+        end
+    }
+
+end
