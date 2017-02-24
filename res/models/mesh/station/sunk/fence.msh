@@ -1,0 +1,22 @@
+function data() return {
+	animations = {
+
+	},
+	matConfigs = { { 0, }, },
+	subMeshes = { {
+		indices = {
+			normal = { count = 3168, offset = 38016, },
+			position = { count = 3168, offset = 41184, },
+			tangent = { count = 3168, offset = 44352, },
+			uv0 = { count = 3168, offset = 47520, },
+		},
+		materials = { "station/sunk_side_wall.mtl" },
+	}, },
+	vertexAttr =
+	{
+		normal = { count = 9504, numComp = 3, offset = 0, },
+		position = { count = 9504, numComp = 3, offset = 9504, },
+		tangent = { count = 12672, numComp = 4, offset = 19008, },
+		uv0 = { count = 6336, numComp = 2, offset = 31680, },
+	},
+} end

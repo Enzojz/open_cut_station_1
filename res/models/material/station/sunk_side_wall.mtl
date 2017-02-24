@@ -4,26 +4,53 @@ return {
 		fade_out_range = {
 			fadeOutEndDist = 20000,
 			fadeOutStartDist = 10000,
+			
 		},
-		map_color_alpha = {
+		map_albedo = {
 			compressionAllowed = true,
-			fileName = "models/station/sunk_side_wall.tga",
+			fileName = "models/station/concrete.dds",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0,
 			type = "TWOD",
 			wrapS = "REPEAT",
 			wrapT = "REPEAT",
+			
 		},
-		props = {
-			coeffs = {
-				1, 1, 0.25, 20, 
-			},
+		map_metal_gloss_ao = {
+			compressionAllowed = true,
+			fileName = "models/station/concrete_ao.dds",
+			magFilter = "LINEAR",
+			minFilter = "LINEAR_MIPMAP_LINEAR",
+			mipmapAlphaScale = 0,
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+			
+		},
+		map_normal = {
+			compressionAllowed = true,
+			fileName = "models/station/normals.tga",
+			magFilter = "LINEAR",
+			minFilter = "LINEAR_MIPMAP_LINEAR",
+			mipmapAlphaScale = 0,
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+			
+		},
+		polygon_offset = {
+			factor = 0,
+			units = 0,
+			
 		},
 		two_sided = {
 			twoSided = false,
+			
 		},
+		
 	},
-	type = "TRANSPARENT",
+	type = "PHYSICAL_NRML_MAP",
+	
 }
 end

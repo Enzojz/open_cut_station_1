@@ -1,0 +1,82 @@
+function data()
+    return {
+        lods = {
+            {
+                children = {
+                    {
+                        id = "station/sunk/stairs_inter.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/fence_inter.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_side.msh",
+                        transf = {
+                           -1, 0, 0, 0,
+                            0,-1, 0, 0,
+                            0, 0, 1, 0,
+                            -2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/fence_flat_side.msh",
+                        transf = {
+                           -1, 0, 0, 0,
+                            0,-1, 0, 0,
+                            0, 0, 1, 0,
+                            -2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_side.msh",
+                        transf = {
+                           -1, 0, 0, 0,
+                            0,-1, 0, 0,
+                            0, 0, 1, 0,
+                            2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/fence_flat_side.msh",
+                        transf = {
+                           -1, 0, 0, 0,
+                            0,-1, 0, 0,
+                            0, 0, 1, 0,
+                            2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                },
+                matConfigs = {
+                    {0, },
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 1000,
+            },
+        },
+        metadata = {
+            cost = {
+                price = 10000,
+            },
+        },
+    
+    }
+end

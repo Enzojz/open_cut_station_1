@@ -6,14 +6,75 @@ local trackEdge = require "trackedge"
 local station = require "stationlib"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
-local heightList = {-10, -12.5, -20}
+local heightList = {-8, -10, -12.5}
 local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
+
+local stairModels = {
+    last = {
+        model = "station/train/passenger/sunk/stairs_last.mdl",
+        delta = coor.xyz(0, -1.25, 1)
+    },
+    rep = {
+        model = "station/train/passenger/sunk/stairs.mdl",
+        delta = coor.xyz(0, -1.25, 1)
+    },
+    flat = {
+        model = "station/train/passenger/sunk/stairs_flat.mdl",
+        delta = coor.xyz(0, -1, 0)
+    },
+    inter = {
+        model = "station/train/passenger/sunk/stairs_inter.mdl",
+        delta = coor.xyz(0, -1.75, 0)
+    },
+    side = {
+        model = "station/train/passenger/sunk/stairs_flat_side.mdl",
+        delta = coor.xyz(0, 0, 0)
+    }
+}
+
+local stairsConfig = {
+    {stairModels.side, stairModels.inter,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last},
+    {stairModels.side, stairModels.inter,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last},
+}
 
 local newModel = function(m, ...)
     return {
         id = m,
         transf = coor.mul(...)
     }
+end
+
+local buildStairs = function(seq, c, m)
+    m = m or coor.I()
+    local function build(result, left, c)
+        if (#left == 0) then
+            return result
+        else
+            local model = table.remove(left)
+            return build(func.concat(result, {newModel(model.model, coor.trans(c), m)}), left, c - model.delta)
+        end
+    end
+    
+    return build({}, func.rev(seq), c)
+end
+
+local buildAllStairs = function(xOffsets, uOffsets)
+    return
+        func.flatten({
+            func.mapFlatten(uOffsets, function(offset)
+                return buildStairs(stairsConfig[1], coor.xyz(0, 0, 0), coor.transX(offset.x))
+            end),
+            func.mapFlatten(xOffsets, function(offset)
+                return {
+                    newModel(stairModels.side.model, coor.transX(offset.x)),
+                    newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.transX(offset.x))
+                }
+            end)
+        })
 end
 
 local function snapRule(n) return function(e) return func.filter(func.seq(0, #e - 1), function(i) return (i > n) and (i - 3) % 4 == 0 end) end end
@@ -43,7 +104,7 @@ local function params()
             key = "platformHeight",
             name = _("Depth") .. "(m)",
             values = func.map(heightList, tostring),
-            defaultIndex = 1
+            defaultIndex = 0
         },
         paramsutil.makeTramTrackParam1(),
         paramsutil.makeTramTrackParam2()
@@ -137,8 +198,8 @@ local function updateFn(config)
             local offsets = func.flatten({xOffsets, uOffsets})
             table.sort(offsets, function(l, r) return l.x < r.x end)
             
-            local xMin = offsets[1].x - station.trackWidth
-            local xMax = offsets[#offsets].x + station.trackWidth
+            local xMin = offsets[1].x - 0.5 * station.trackWidth - 1
+            local xMax = offsets[#offsets].x + 0.5 * station.trackWidth + 1
             local yMin = -0.5 * length - 20
             local yMax = -yMin
             
@@ -152,8 +213,13 @@ local function updateFn(config)
                 )
                 end)
             
-            result.models = func.concat(station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0.3)), sideWalls)
-            
+            result.models = func.flatten(
+                {
+                    station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0.3)),
+                    sideWalls,
+                    buildAllStairs(xOffsets, uOffsets)
+                }
+            )
             result.terminalGroups = station.makeTerminals(xuIndex)
             
             -- End of generation
@@ -166,37 +232,32 @@ local function updateFn(config)
                 {xMax, yMax, height}
             }
             
+            
+            local basePt = {
+                coor.xyz(-0.5, -0.5, 0),
+                coor.xyz(0.5, -0.5, 0),
+                coor.xyz(0.5, 0.5, 0),
+                coor.xyz(-0.5, 0.5, 0)
+            }
+            
+            local fBase = func.map(basePt, function(f) return (f .. coor.scaleX(xMax - xMin) * coor.scaleY(yMax - yMin) * coor.transX((xMax + xMin) * 0.5) * coor.transZ(height)):toTuple() end)
+            local fOutter = func.map(basePt, function(f) return (f .. coor.scaleX(xMax - xMin + 4) * coor.scaleY(yMax - yMin + 4) * coor.transX((xMax + xMin) * 0.5)):toTuple() end)
+            
             result.groundFaces = {
-                {face = f, modes = {{type = "FILL", key = "industry_gravel_small_01"}}},
-                {face = f, modes = {{type = "STROKE_OUTER", key = "building_paving"}}}
+                {face = fBase, modes = {{type = "FILL", key = "industry_gravel_small_01"}}},
+                {face = fBase, modes = {{type = "STROKE_OUTER", key = "building_paving"}}}
             }
             
             result.terrainAlignmentLists = {
                 {
                     type = "LESS",
-                    faces = {{
-                        {xMin - 2, yMax, 0},
-                        {xMin - 2, yMin, 0},
-                        {xMin, yMin, 0},
-                        {xMin, yMax, 0}
-                    }},
-                    slopeLow = 0.35,
-                    slopeHigh = 0.6,
-                },
-                {
-                    type = "LESS",
-                    faces = {{
-                        {xMax + 2, yMax, 0},
-                        {xMax + 2, yMin, 0},
-                        {xMax, yMin, 0},
-                        {xMax, yMax, 0}
-                    }},
+                    faces = {fOutter},
                     slopeLow = 0.35,
                     slopeHigh = 0.6,
                 },
                 {
                     type = "EQUAL",
-                    faces = {f},
+                    faces = {fBase},
                     slopeLow = 0,
                 },
             }
