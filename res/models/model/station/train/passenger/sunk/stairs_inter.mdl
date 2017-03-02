@@ -1,3 +1,4 @@
+local laneutil = require "laneutil"
 function data()
     return {
         lods = {
@@ -73,10 +74,17 @@ function data()
             },
         },
         metadata = {
-            cost = {
-                price = 10000,
+            transportNetworkProvider = {
+                laneLists = {
+                    {
+                        transportModes = {"PERSON"},
+                        nodes = laneutil.makeLanes({
+                            {{0, 0, 0}, {2.5, 0, 0}, {1, 0, 0}, {1, 0, 0}, 2.4},
+                            {{0, 0, 0}, {0, 1.75, 0}, {0, 1, 0}, {0, 1, 0}, 2.4},
+                        })
+                    }
+                },
             },
         },
-    
     }
 end

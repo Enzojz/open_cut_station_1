@@ -3,7 +3,7 @@ local func = require("func")
 
 local wallSegs = {1, 2, 3, 4, 5}
 local wallLength = 20
-local wallHeight = {5, 7.5, 10, 12.5, 15, 17.5, 20}
+local wallHeight = {5, 8.8, 10.8, 12.8, 15, 17.5, 20}
 
 local newModel = function(m, ...)
     return {
@@ -39,7 +39,7 @@ function data()
             {
                 key = "wallHeight",
                 name = _("Wall height") .. "(m)",
-                values = func.map(wallHeight, tostring),
+                values = func.map(func.map(wallHeight, math.floor), tostring),
                 defaultIndex = 2
             },
         },
@@ -57,7 +57,7 @@ function data()
                 func.mapFlatten(func.seq(0, mSeg - 1), function(m) return
                     func.seqMap({1, nSeg}, function(n)
                         return newModel("station/train/passenger/sunk/sunk_side_wall.mdl",
-                            coor.xXY(), coor.transY(-5), coor.transX((n - 0.5) * wallLength - 0.5 * totalLength), coor.transZ(zDisp + m * 10)
+                            coor.xXY(), coor.transY(-3), coor.transX((n - 0.5) * wallLength - 0.5 * totalLength), coor.transZ(zDisp + m * 10)
                     )
                     end)
                 end)
@@ -70,13 +70,13 @@ function data()
                 {
                     type = "GREATER",
                     faces = {{
-                        {yMin, -5, height},
+                        {yMin, -3, height},
                         {yMin, -extWidth, height},
                         {yMax, -extWidth, height},
-                        {yMax, -5, height},
+                        {yMax, -3, height},
                     },
                     {
-                        {yMax, -5, height},
+                        {yMax, -3, height},
                         {yMax, -extWidth, height},
                         {yMax + extWidth - 6, -extWidth, 0},
                         {yMax + extWidth - 6, -5, 0},
@@ -85,7 +85,7 @@ function data()
                         {yMin - extWidth + 6, -5, 0},
                         {yMin - extWidth + 6, -extWidth, 0},
                         {yMin, -extWidth, height},
-                        {yMin, -5, height},
+                        {yMin, -3, height},
                     }},
                     slopeLow = 0,
                     slopeHigh = 0,

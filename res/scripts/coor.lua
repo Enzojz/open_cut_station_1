@@ -301,6 +301,24 @@ function coor.scaleZ(sz)
     }
 end
 
+function coor.shearX(sx)
+    return init * {
+        1,sx, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+function coor.shearY(sy)
+    return init * {
+        1, 0, 0, 0,
+       sy, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
 
 function coor.mul(...)
     local params = {...}

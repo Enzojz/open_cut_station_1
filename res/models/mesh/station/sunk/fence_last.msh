@@ -1,22 +1,31 @@
-function data() return {
-	animations = {
-
-	},
-	matConfigs = { { 0, }, },
-	subMeshes = { {
-		indices = {
-			normal = { count = 3216, offset = 38592, },
-			position = { count = 3216, offset = 41808, },
-			tangent = { count = 3216, offset = 45024, },
-			uv0 = { count = 3216, offset = 48240, },
-		},
-		materials = { "station/sunk_side_wall.mtl" },
-	}, },
-	vertexAttr =
-	{
-		normal = { count = 9648, numComp = 3, offset = 0, },
-		position = { count = 9648, numComp = 3, offset = 9648, },
-		tangent = { count = 12864, numComp = 4, offset = 19296, },
-		uv0 = { count = 6432, numComp = 2, offset = 32160, },
-	},
-} end
+function data() return 
+  { animations = {  }, matConfigs = { { 0 } }, 
+    subMeshes = 
+      { 
+        { 
+          indices = 
+            { 
+              normal = 
+                { count = 3216, offset = 38592 }, 
+              position = 
+                { count = 3216, offset = 38592 }, 
+              tangent = 
+                { count = 3216, offset = 38592 }, 
+              uv0 = 
+                { count = 3216, offset = 38592 }, 
+             }, 
+          materials = { "sunk_fence.mtl" }
+         }
+       }, 
+    vertexAttr = 
+      { 
+        normal = 
+          { count = 9648, numComp = 3, offset = 16080 }, 
+        position = 
+          { count = 9648, numComp = 3, offset = 0 }, 
+        tangent = 
+          { count = 12864, numComp = 4, offset = 25728 }, 
+        uv0 = 
+          { count = 6432, numComp = 2, offset = 9648 }, 
+       }
+   } end

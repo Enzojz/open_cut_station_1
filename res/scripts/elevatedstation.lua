@@ -6,7 +6,7 @@ local trackEdge = require "trackedge"
 local station = require "stationlib"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
-local heightList = {-8, -10, -12.5}
+local heightList = {-8.8, -10.8, -12.8}
 local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
 
 local stairModels = {
@@ -33,12 +33,22 @@ local stairModels = {
 }
 
 local stairsConfig = {
-    {stairModels.side, stairModels.inter,
-        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
-        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last},
-    {stairModels.side, stairModels.inter,
+    {
+        stairModels.inter,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last
+    },
+    {
+        stairModels.inter,
         stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
-        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last},
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last
+    },
+    {
+        stairModels.inter,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.rep, stairModels.flat,
+        stairModels.rep, stairModels.rep, stairModels.rep, stairModels.last
+    },
 }
 
 local newModel = function(m, ...)
@@ -48,32 +58,44 @@ local newModel = function(m, ...)
     }
 end
 
-local buildStairs = function(seq, c, m)
+local buildStairs = function(seq, c, m, mr)
     m = m or coor.I()
+    mr = mr or coor.I()
     local function build(result, left, c)
         if (#left == 0) then
             return result
         else
             local model = table.remove(left)
-            return build(func.concat(result, {newModel(model.model, coor.trans(c), m)}), left, c - model.delta)
+            return build(func.concat(result, {newModel(model.model, mr, coor.trans(c), m)}), left, c - (model.delta .. mr))
         end
     end
     
     return build({}, func.rev(seq), c)
 end
 
-local buildAllStairs = function(xOffsets, uOffsets)
+local buildAllStairs = function(config, xOffsets, uOffsets)
+    local offsetMax = func.max(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
+    local offsetMin = func.min(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
     return
         func.flatten({
             func.mapFlatten(uOffsets, function(offset)
-                return buildStairs(stairsConfig[1], coor.xyz(0, 0, 0), coor.transX(offset.x))
+                return buildStairs(config, coor.o, coor.transX(offset.x))
+            end),
+            func.mapFlatten(uOffsets, function(offset)
+                return buildStairs(config, coor.o, coor.transX(offset.x), coor.rotZ(math.pi))
             end),
             func.mapFlatten(xOffsets, function(offset)
                 return {
                     newModel(stairModels.side.model, coor.transX(offset.x)),
                     newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.transX(offset.x))
                 }
-            end)
+            end),
+            {
+                newModel(stairModels.flat.model, coor.rotZ(math.pi * 0.5), coor.transX(offsetMax + station.trackWidth * 0.5 + 1)),
+                newModel(stairModels.flat.model, coor.rotZ(math.pi * 0.5), coor.transX(offsetMax + station.trackWidth * 0.5 + 2)),
+                newModel(stairModels.flat.model, coor.rotZ(-math.pi * 0.5), coor.transX(offsetMin - station.trackWidth * 0.5 - 2)),
+                newModel(stairModels.flat.model, coor.rotZ(-math.pi * 0.5), coor.transX(offsetMin - station.trackWidth * 0.5 - 1))
+            }
         })
 end
 
@@ -103,7 +125,7 @@ local function params()
         {
             key = "platformHeight",
             name = _("Depth") .. "(m)",
-            values = func.map(heightList, tostring),
+            values = func.map(func.map(heightList, math.floor), tostring),
             defaultIndex = 0
         },
         paramsutil.makeTramTrackParam1(),
@@ -126,7 +148,9 @@ end
 local function updateFn(config)
     
     local platformPatterns = function(n)
-        local platforms = func.map(func.seq(1, n), function(i) return (i == 0.5 * n) and config.platformDwlink or config.platformRepeat end)
+        local platforms = func.seqMap({1, n}, function(_) return config.platformRepeat end)
+        platforms[0.5 * n] = config.platformDwlink
+        platforms[0.5 * n + 1] = config.platformDwlink
         platforms[1] = config.platformStart
         platforms[n] = config.platformEnd
         return platforms
@@ -162,6 +186,8 @@ local function updateFn(config)
             local platforms = platformPatterns(nSeg)
             local tramTrack = ({"NO", "YES", "ELECTRIC"})[params.tramTrack + 1]
             
+            local stairs = stairsConfig[params.platformHeight + 1]
+            
             local levels = {
                 {
                     mz = coor.transZ(height),
@@ -191,10 +217,6 @@ local function updateFn(config)
             local ext1 = coor.applyEdges(coor.transY(length * 0.5 + 5), coor.I())(station.generateTrackGroups(func.map(xOffsets, resetParity), 10))
             local ext2 = coor.applyEdges(coor.flipY(), coor.flipY())(ext1)
             
-            result.edgeLists = {
-                trackEdge.normal(catenary, trackType, false, snapRule(#normal))(func.flatten({normal, ext1, ext2})),
-            }
-            
             local offsets = func.flatten({xOffsets, uOffsets})
             table.sort(offsets, function(l, r) return l.x < r.x end)
             
@@ -203,10 +225,31 @@ local function updateFn(config)
             local yMin = -0.5 * length - 20
             local yMax = -yMin
             
-            local sideWalls = func.mapFlatten({xMin, xMax},
+            result.edgeLists = {
+                trackEdge.normal(catenary, trackType, false, snapRule(#normal))(func.flatten({normal, ext1, ext2})),
+                {
+                    type = "STREET",
+                    edgeType = "BRIDGE",
+                    edgeTypeName = "road_iron_new.lua",
+                    params =
+                    {
+                        type = "new_large.lua",
+                        tramTrackType = tramTrack
+                    },
+                    edges = {
+                        { {xMin - 3, 30, 0.5}, {xMax - xMin + 6, 0, 0} },
+                        { {xMax + 3, 30, 0.5}, {xMax - xMin + 6, 0, 0} },
+                    },
+                    snapNodes = {0, 1}
+                }
+            }
+            
+
+            local sideWalls = func.mapFlatten({xMin + 0.5, xMax - 0.5},
                 function(xOffset)
                     return func.map2(func.seq(1, nSeg), sideWallPatterns(nSeg), function(i, p)
                         return newModel(p,
+                            coor.shearX(math.atan(0.1)),
                             coor.scaleZ(-height / 10),
                             coor.trans(coor.xyz(xOffset, i * station.segmentLength - 0.5 * (station.segmentLength + length), height))
                     ) end
@@ -217,7 +260,7 @@ local function updateFn(config)
                 {
                     station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0.3)),
                     sideWalls,
-                    buildAllStairs(xOffsets, uOffsets)
+                    buildAllStairs(stairs, xOffsets, uOffsets)
                 }
             )
             result.terminalGroups = station.makeTerminals(xuIndex)
