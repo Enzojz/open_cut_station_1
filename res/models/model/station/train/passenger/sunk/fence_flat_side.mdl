@@ -1,0 +1,30 @@
+local laneutil = require "laneutil"
+local func = require "func"
+function data()
+    return {
+        lods = {
+            {
+                children ={
+                        {
+                            id = "station/sunk/fence_flat_side.msh",
+                            transf = {
+                                1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 0,
+                                0, 0.85, 0, 1
+                            },
+                            type = "MESH",
+                        }
+                        },
+                matConfigs = {
+                    {0, },
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 1000,
+            },
+        },
+        metadata = {
+        },
+    }
+end

@@ -1,0 +1,31 @@
+function data() return 
+  { animations = {  }, matConfigs = { { 0 } }, 
+    subMeshes = 
+      { 
+        { 
+          indices = 
+            { 
+              normal = 
+                { count = 2160, offset = 25920 }, 
+              position = 
+                { count = 2160, offset = 25920 }, 
+              tangent = 
+                { count = 2160, offset = 25920 }, 
+              uv0 = 
+                { count = 2160, offset = 25920 }, 
+             }, 
+          materials = { "sunk_fence.mtl" }
+         }
+       }, 
+    vertexAttr = 
+      { 
+        normal = 
+          { count = 6480, numComp = 3, offset = 10800 }, 
+        position = 
+          { count = 6480, numComp = 3, offset = 0 }, 
+        tangent = 
+          { count = 8640, numComp = 4, offset = 17280 }, 
+        uv0 = 
+          { count = 4320, numComp = 2, offset = 6480 }, 
+       }
+   } end

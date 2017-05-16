@@ -8,7 +8,7 @@ return {
 		},
 		map_albedo = {
 			compressionAllowed = true,
-			fileName = "models/station/fence_red.dds",
+			fileName = "models/station/concrete.dds",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0,

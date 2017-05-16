@@ -60,9 +60,9 @@ local config = {
     platformStart = "station/train/passenger/1990/platform_double_start.mdl",
     platformEnd = "station/train/passenger/1990/platform_double_end.mdl",
     platformDwlink = "station/train/passenger/sunk/1990/underground_platform_downstairs.mdl",
-    stationHouse = "station/train/passenger/sunk/1990/underground_house.mdl",
+    stationHouse = "station/train/passenger/sunk/1990/main_building.mdl",
     staires = "station/train/passenger/sunk/1990/underground_stairs.mdl",
-    sideWall = "station/train/passenger/sunk/sunk_side_wall.mdl",
+    sideWall = "station/train/passenger/sunk/oc_wall_20.mdl",
     sideWallFst = "station/train/passenger/sunk/sunk_side_wall_fst.mdl",
     sideWallLst = "station/train/passenger/sunk/sunk_side_wall_lst.mdl",
 }

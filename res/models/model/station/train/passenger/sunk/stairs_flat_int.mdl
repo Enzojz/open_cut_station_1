@@ -1,0 +1,81 @@
+local laneutil = require "laneutil"
+function data()
+    return {
+        lods = {
+            {
+                children = {
+                    {
+                        id = "station/sunk/stairs_flat_int.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_int.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            -1, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_int.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            -2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_int.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            1, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                    {
+                        id = "station/sunk/stairs_flat_int.msh",
+                        transf = {
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            2, 0, 0, 1
+                        },
+                        type = "MESH",
+                    },
+                },
+                matConfigs = {
+                    {0, },
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 1000,
+            },
+        },
+        metadata = {
+            transportNetworkProvider = {
+                laneLists = {
+                    {
+                        transportModes = {"PERSON"},
+                        nodes = laneutil.makeLanes({
+                            {{0, 0.5, 0}, {-2.5, 0.5, 0}, {-1, 0, 0}, {-1, 0, 0}, 2.4},
+                            {{0, 0, 0}, {0, -0.5, 0}, {0, -1, 0}, {0, -1, 0}, 2.4},
+                            {{-2.5, 0, 0}, {-2.5, 0.5, 0}, {0, 1, 0}, {0, 1, 0}, 2.4},
+                        })
+                    }
+                },
+            },
+        },
+    }
+end
