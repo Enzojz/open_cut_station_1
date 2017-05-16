@@ -26,9 +26,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
 local laneutil = require "laneutil"
+local func = require "func"
 
 local coor = {}
 coor.make = laneutil.makeLanes
+
 
 local vecXyMeta = {
     __add = function(lhs, rhs)

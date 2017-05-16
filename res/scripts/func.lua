@@ -25,70 +25,98 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
-func = {}
+
+local func = {}
+
+func.pi = require "pipe"
 
 function func.fold(ls, init, fun)
-    for _, e in ipairs(ls) do
-        init = fun(init, e)
-    end
-    return init
+    return func.pi.fold(init, fun)(ls)
 end
 
 function func.forEach(ls, fun)
-    for i, e in ipairs(ls) do fun(e) end
+    func.pi.forEach(fun)(ls)
 end
 
 function func.map(ls, fun)
-    local result = {}
-    for i, e in ipairs(ls) do result[i] = fun(e) end
-    return result
+    return func.pi.map(fun)(ls)
 end
 
-
 function func.mapValues(ls, fun)
-    local result = {}
-    for i, e in pairs(ls) do result[i] = fun(e) end
-    return result
+    return func.pi.mapValues(fun)(ls)
 end
 
 function func.mapPair(ls, fun)
-    local result = {}
-    for i, e in ipairs(ls) do
-        local k, v = fun(e)
-        result[k] = v
-    end
-    return result
+    return func.pi.mapPair(fun)(ls)
 end
 
 function func.filter(ls, pre)
-    local result = {}
-    for _, e in ipairs(ls) do
-        if pre(e) then result[#result + 1] = e end
-    end
-    return result
+    return func.pi.filter(pre)(ls)
 end
 
 function func.concat(t1, t2)
-    local res = {}
-    for _, v in ipairs(t1) do
-        table.insert(res, v)
-    end
-    for _, v in ipairs(t2) do
-        table.insert(res, v)
-    end
-    return res
+    return func.pi.concat(t2)(t1)
 end
 
 function func.flatten(ls)
+    return func.pi.flatten()(ls)
+end
+
+function func.mapFlatten(ls, fun)
+    return func.pi.mapFlatten(fun)(ls)
+end
+
+function func.map2(ls1, ls2, fun)
+    return func.pi.map2(ls2, fun)(ls1)
+end
+
+function func.range(ls, from, to)
+    return func.pi.range(from, to)(ls)
+end
+
+function func.max(ls, less)
+    return func.pi.max(less)(ls)
+end
+
+function func.min(ls, less)
+    return func.pi.min(less)(ls)
+end
+
+function func.with(ls, newValues)
+    return func.pi.with(newValues)(ls)
+end
+
+function func.sort(ls, fn)
+    return func.pi.sort(fn)(ls)
+end
+
+function func.rev(ls)
+    return func.pi.rev()(ls)
+end
+
+function func.seq(from, to)
     local result = {}
-    for _, v in ipairs(ls) do
-        result = func.concat(result, v)
+    for i = from, to do
+        table.insert(result, i)
     end
     return result
 end
 
-function func.mapFlatten(ls, fun)
-    return func.flatten(func.map(ls, fun))
+function func.seqValue(n, value)
+    return func.seqMap({1, n}, function(_) return value end)
+end
+
+function func.seqMap(range, fun)
+    return func.map(func.seq(table.unpack(range)), fun)
+end
+
+function func.pipe(op, f, ...)
+    local rest = {...}
+    if (#rest > 0) then
+        return func.pipe(f(op), ...)
+    else
+        return f(op)
+    end
 end
 
 function func.bind(fun, ...)
@@ -107,75 +135,9 @@ function func.bind(fun, ...)
     end
 end
 
-function func.seq(from, to)
-    local result = {}
-    for i = from, to do
-        table.insert(result, i)
-    end
-    return result
-end
-
-function func.seqMap(range, fun)
-    return func.map(func.seq(table.unpack(range)), fun)
-end
-
-function func.pipe(op, f, ...)
-    local rest = {...}
-    if (#rest > 0) then
-        return func.pipe(f(op), ...)
-    else
-        return f(op)
-    end
-end
-
 function func.exec(...)
     local rest = {...}
     return function(p) return func.pipe(p, table.unpack(rest)) end
-end
-
-function func.map2(ls1, ls2, fun)
-    local result = {}
-    for i, e in ipairs(ls1) do result[i] = fun(e, ls2[i]) end
-    return result
-end
-
-function func.range(ls, from, to)
-    local result = {}
-    for i = from, to do table.insert(result, ls[i]) end
-    return result
-end
-
-function func.seqValue(n, value)
-    return func.seqMap({1, n}, function(_) return value end)
-end
-
-function func.max(ls, less)
-    return func.fold(ls, ls[1], function(l, r) return less(l, r) and r or l end)
-end
-
-function func.min(ls, less)
-    return func.fold(ls, ls[1], function(l, r) return less(l, r) and l or r end)
-end
-
-function func.with(ls, newValues)
-    local result = {}
-    for i, e in pairs(ls) do result[i] = e end
-    for i, e in pairs(newValues) do result[i] = e end
-    return result
-end
-
-function func.sort(ls, fn)
-    local result = func.with(ls, {})
-    table.sort(result, fn)
-    return result
-end
-
-function func.rev(ls)
-    local result = {}
-    for i = #ls, 1, -1 do
-        table.insert(result, ls[i]) 
-    end
-    return result
 end
 
 local pipeMeta = {
