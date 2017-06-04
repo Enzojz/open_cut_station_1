@@ -6,42 +6,42 @@ local trackEdge = require "trackedge"
 local station = require "stationlib"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
-local heightList = {-8.8, -10.8, -12.8}
+local heightList = {-8, -10, -12}
 local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
 
 local stairModels = {
     last = {
-        model = "station/train/passenger/sunk/stairs_last.mdl",
+        model = "station/train/passenger/opencut/stairs_last.mdl",
         delta = coor.xyz(0, -1.25, 1)
     },
     rep = {
-        model = "station/train/passenger/sunk/stairs.mdl",
+        model = "station/train/passenger/opencut/stairs.mdl",
         delta = coor.xyz(0, -1.25, 1)
     },
     flat = {
-        model = "station/train/passenger/sunk/stairs_flat.mdl",
+        model = "station/train/passenger/opencut/stairs_flat.mdl",
         delta = coor.xyz(0, -1, 0)
     },
     inter = {
-        model = "station/train/passenger/sunk/stairs_inter.mdl",
+        model = "station/train/passenger/opencut/stairs_inter.mdl",
         delta = coor.xyz(0, -1.75, 0)
     },
     side = {
-        model = "station/train/passenger/sunk/stairs_flat_side.mdl",
+        model = "station/train/passenger/opencut/stairs_flat_side.mdl",
         delta = coor.xyz(0, 0, 0)
     },
     base = {
-        model = "station/train/passenger/sunk/stairs_base.mdl",
+        model = "station/train/passenger/opencut/stairs_base.mdl",
         delta = coor.xyz(0, 0, 1)
     },
     int = {
-        model = "station/train/passenger/sunk/stairs_flat_int.mdl",
+        model = "station/train/passenger/opencut/stairs_flat_int.mdl",
         delta = coor.xyz(0, 0, 0)
     },
 }
 
-local fence = "station/train/passenger/sunk/fence_flat_side.mdl"
-local fenceInter = "station/train/passenger/sunk/fence_angle.mdl"
+local fence = "station/train/passenger/opencut/fence_flat_side.mdl"
+local fenceInter = "station/train/passenger/opencut/fence_angle.mdl"
 
 local stairsConfig = {
     {
@@ -87,24 +87,25 @@ end
 local buildAllStairs = function(config, xOffsets, uOffsets)
     local offsetMax = func.max(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
     local offsetMin = func.min(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
+    local zOffset = 0.8
     return
         func.flatten({
             func.mapFlatten(uOffsets, function(offset)
-                return buildStairs(config, coor.o, coor.transX(offset.x) * coor.transY(0.5))
+                return buildStairs(config, coor.o, coor.trans(coor.xyz(offset.x, 0.5, zOffset)))
             end),
             func.mapFlatten(uOffsets, function(offset)
-                return buildStairs(config, coor.o, coor.rotZ(math.pi) * coor.transX(offset.x) * coor.transY(-0.5))
+                return buildStairs(config, coor.o, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, -0.5, zOffset)))
             end),
             func.mapFlatten(xOffsets, function(offset)
                 return {
-                    newModel(stairModels.side.model, coor.transX(offset.x) * coor.transY(-0.5)),
-                    newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.transX(offset.x) * coor.transY(0.5)),
+                    newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, -0.5, zOffset))),
+                    newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, 0.5, zOffset))),
                 }
             end),
             func.mapFlatten(func.concat(xOffsets, uOffsets), function(offset)
                 return {
-                    newModel(stairModels.int.model, coor.transX(offset.x)),
-                    newModel(stairModels.int.model, coor.rotZ(math.pi) * coor.transX(offset.x)),
+                    newModel(stairModels.int.model, coor.transX(offset.x) * coor.transZ(zOffset)),
+                    newModel(stairModels.int.model, coor.rotZ(math.pi) * coor.transX(offset.x) * coor.transZ(zOffset)),
                 }
             end),
             func.mapFlatten(uOffsets, function(offset)
@@ -112,15 +113,15 @@ local buildAllStairs = function(config, xOffsets, uOffsets)
                     buildStairs(
                         func.map(func.filter(config, function(m) return m.delta.z > 0 end), function(_) return stairModels.base end),
                         coor.o,
-                        coor.transZ(-1) * coor.transX(offset.x)
+                        coor.transZ(-1 + zOffset) * coor.transX(offset.x)
             )
             end
             ),
             {
-                newModel(fenceInter, coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth)),
-                newModel(fenceInter, coor.transX(offsetMax + 0.5 * station.trackWidth)),
-                newModel(fenceInter, coor.flipY(), coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth)),
-                newModel(fenceInter, coor.flipY(), coor.transX(offsetMax + 0.5 * station.trackWidth))
+                newModel(fenceInter, coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth) * coor.transZ(zOffset)),
+                newModel(fenceInter, coor.transX(offsetMax + 0.5 * station.trackWidth) * coor.transZ(zOffset)),
+                newModel(fenceInter, coor.flipY(), coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth) * coor.transZ(zOffset)),
+                newModel(fenceInter, coor.flipY(), coor.transX(offsetMax + 0.5 * station.trackWidth) * coor.transZ(zOffset))
             }
         })
 end
@@ -255,47 +256,48 @@ local function updateFn(config)
                 trackEdge.normal(catenary, trackType, false, snapRule(#normal))(func.flatten({normal, ext1, ext2})),
                 {
                     type = "STREET",
-                    edgeType = "BRIDGE",
-                    edgeTypeName = "road_iron_new.lua",
                     params =
                     {
-                        type = "new_large.lua",
-                        tramTrackType = tramTrack
+                        type = "station_new_small.lua",
+                        tramTrackType = "NO"
                     },
                     edges = {
-                        {{xMin - 3, 30, 0.5}, {xMax - xMin + 6, 0, 0}},
-                        {{xMax + 3, 30, 0.5}, {xMax - xMin + 6, 0, 0}},
+                        {{-17.25, 0, 0}, {-20, 0, 0}},
+                        {{-37.25, 0, 0}, {-20, 0, 0}}
                     },
-                    snapNodes = {0, 1}
+                    snapNodes = {1}
                 }
             }
             
-            
-            local sideWalls = func.mapFlatten({xMin + 0.5, xMax - 0.5},
-                function(xOffset)
-                    return func.map2(func.seq(1, nSeg), sideWallPatterns(nSeg), function(i, p)
-                        return newModel(p,
-                            coor.shearX(math.atan(0.1)),
-                            coor.scaleZ(-height / 10),
-                            coor.trans(coor.xyz(xOffset, i * station.segmentLength - 0.5 * (station.segmentLength + length), height))
-                    ) end
-                )
-                end)
+            local sideWalls =
+                func.p
+                * func.seq(1, nSeg)
+                * func.pi.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) end)
+                * func.pi.map2(sideWallPatterns(nSeg), function(y, m) return {y = y, m = m} end)
+                * func.pi.mapFlatten(function(s) return {{m = s.m, v = {xMin, s.y, height}}, {m = s.m, v = {xMax, s.y, height}}} end)
+                * func.pi.map(function(s)
+                    return newModel(s.m,
+                        -- coor.shearX(math.atan(0.1)),
+                        coor.scaleX(2),
+                        coor.scaleZ((-height + 0.8) / 10),
+                        coor.trans(coor.xyz(table.unpack(s.v)))
+                ) end)
+                / 0
             
             local wallFences =
                 func.p
                 * func.seq(2, nSeg * station.segmentLength * 0.5 - 2)
                 * func.pi.mapFlatten(function(i) return {{x = xMin + 0.35, n = i}, {x = xMax - 0.35, n = i}} end)
-                * func.pi.mapFlatten(function(v) return {{v.x, v.n + 0.75, 0}, {v.x, -v.n - 0.75, 0}} end)
+                * func.pi.mapFlatten(function(v) return {{v.x, v.n + 0.75, 0.8}, {v.x, -v.n - 0.75, 0.8}} end)
                 * func.pi.map(function(v) return newModel(fence, coor.rotZ(math.pi * 0.5), coor.trans(coor.xyz(table.unpack(v)))) end)
                 / 0
             
             result.models = func.flatten(
                 {
-                    station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0.3)),
+                    station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0)),
                     sideWalls,
                     buildAllStairs(stairs, xOffsets, uOffsets),
-                    {newModel(stationHouse, coor.transX(xMin - 3))},
+                    {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 3.75))},
                     wallFences
                 }
             )
@@ -324,23 +326,30 @@ local function updateFn(config)
             local fOutter = func.map(basePt,
                 function(f) return (f .. coor.scaleX(xMax - xMin + 4) * coor.scaleY(yMax - yMin + 4) * coor.transX((xMax + xMin) * 0.5)):toTuple() end)
             
+            local fHouse = func.map(basePt,
+                function(f) return (f .. coor.scaleX(18) * coor.scaleY(18) * coor.transX(-7.5)):toTuple() end)
+            
             result.groundFaces = {
                 {face = fBase, modes = {{type = "FILL", key = "industry_gravel_small_01"}}},
-                {face = fBase, modes = {{type = "STROKE_OUTER", key = "building_paving"}}}
+                {face = fBase, modes = {{type = "STROKE_OUTER", key = "building_paving"}}},
+                {face = fHouse, modes = {{type = "FILL", key = "industry_gravel_small_01"}}},
+                {face = fHouse, modes = {{type = "STROKE_OUTER", key = "building_paving"}}}
             }
             
             result.terrainAlignmentLists = {
                 {
+                    type = "EQUAL",
+                    faces = {fHouse}
+                },
+                {
                     type = "LESS",
                     faces = {fOutter},
-                    slopeLow = 0.35,
-                    slopeHigh = 0.6,
                 },
                 {
                     type = "EQUAL",
                     faces = {fBase},
                     slopeLow = 0,
-                },
+                }
             }
             
             

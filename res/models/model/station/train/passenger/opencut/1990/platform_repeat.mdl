@@ -1,0 +1,136 @@
+local laneutil = require "laneutil"
+local coor = require "coor"
+local func = require "func"
+
+local laneWidth = 2.4
+
+function data()
+    return {
+            
+            collider = {
+                params = {
+                
+                },
+                type = "MESH",
+            
+            },
+            lods = {
+                {
+                    animations = {
+                    
+                    },
+                    children = {
+                        {
+                            id = "station/train/passenger/1990/lod_0_perron_double_repeat.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                    },
+                    events = {
+                    
+                    },
+                    matConfigs = {
+                        {
+                            0,
+                        },
+                    },
+                    static = false,
+                    visibleFrom = 200,
+                    visibleTo = 1920,
+                },
+                {
+                    animations = {
+                    
+                    },
+                    children = {
+                        {
+                            id = "station/train/passenger/1990/lod_0_perron_double_repeat.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                        {
+                            id = "station/train/passenger/1990/lod_0_double_chair.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0.8, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                        {
+                            id = "station/train/passenger/1990/lod_0_trashcan.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 4, 0.8, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                        
+                        {
+                            id = "station/train/passenger/1990/lod_0_double_chair.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -2, 0.8, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                        {
+                            id = "station/train/passenger/1990/lod_0_trashcan.msh",
+                            transf = {
+                                1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -4, 0.8, 1,
+                            },
+                            type = "MESH",
+                        
+                        },
+                    
+                    },
+                    events = {
+                    
+                    },
+                    matConfigs = {
+                        {
+                            0, 0, 0,
+                        },
+                    },
+                    static = false,
+                    visibleFrom = 0,
+                    visibleTo = 200,
+                
+                },
+            },
+            metadata = {
+                transportNetworkProvider = {
+                    laneLists = {
+                        {
+                            transportModes = {"PERSON"},
+                            nodes = laneutil.makeLanes(
+                                func.p
+                                *
+                                func.mapFlatten({1.5, -1.5}, function(s) return
+                                    func.mapFlatten({1, -1}, function(o) return
+                                        func.map2({0, 2.5, 4, 6, 7.5}, {2.5, 4, 6, 7.5, 10},
+                                            function(f, t) return {{s, o * f, .80}, {s, o * t, .80}, {0, o, 0}, {0, o, 0}, laneWidth} end
+                                    )
+                                    end
+                                )
+                                end)
+                                * func.pi.concat({{{1.5, 0.0, .80}, {-1.5, 0.0, .80}, {-3.0, 0.0, .0}, {-3.0, 0.0, .0}, laneWidth}})
+                                / 0
+                        )
+                        }
+                    },
+                    terminals = {
+                        {personNodes = {20}, personEdges = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19}},
+                        {personNodes = {0}, personEdges = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}
+                    }
+                }
+            }
+    
+    
+    }
+end

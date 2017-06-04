@@ -56,7 +56,7 @@ function data()
             result.models =
                 func.mapFlatten(func.seq(0, mSeg - 1), function(m) return
                     func.seqMap({1, nSeg}, function(n)
-                        return newModel("station/train/passenger/sunk/sunk_side_wall.mdl",
+                        return newModel("station/train/passenger/opencut/side_wall.mdl",
                             coor.xXY(), coor.transY(-3), coor.transX((n - 0.5) * wallLength - 0.5 * totalLength), coor.transZ(zDisp + m * 10)
                     )
                     end)

@@ -46,7 +46,7 @@ data = rawData
 ==== NOTICE TO MAKE YOUR OWN UNDERGROUND STATION ====
 --]]
 
-local station = require "elevatedstation"
+local station = require "opencutstation"
 
 local config = {
     availability = {
@@ -56,15 +56,14 @@ local config = {
     soundConfig = {
         soundSet = {name = "station_passenger_old"}
     },
-    platformRepeat = "station/train/passenger/1990/platform_double_repeat.mdl",
+    platformRepeat = "station/train/passenger/opencut/1990/platform_repeat.mdl",
     platformStart = "station/train/passenger/1990/platform_double_start.mdl",
     platformEnd = "station/train/passenger/1990/platform_double_end.mdl",
-    platformDwlink = "station/train/passenger/sunk/1990/underground_platform_downstairs.mdl",
-    stationHouse = "station/train/passenger/sunk/1990/main_building.mdl",
-    staires = "station/train/passenger/sunk/1990/underground_stairs.mdl",
-    sideWall = "station/train/passenger/sunk/oc_wall_20.mdl",
-    sideWallFst = "station/train/passenger/sunk/sunk_side_wall_fst.mdl",
-    sideWallLst = "station/train/passenger/sunk/sunk_side_wall_lst.mdl",
+    platformDwlink = "station/train/passenger/opencut/1990/platform_downstairs.mdl",
+    stationHouse = "station/train/passenger/opencut/1990/main_building.mdl",
+    sideWall = "station/train/passenger/opencut/wall_20.mdl",
+    sideWallFst = "station/train/passenger/opencut/side_wall_fst.mdl",
+    sideWallLst = "station/train/passenger/opencut/side_wall_lst.mdl",
 }
 
 data = station.dataCallback(config)
