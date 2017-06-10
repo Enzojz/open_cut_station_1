@@ -94,6 +94,10 @@ function func.rev(ls)
     return func.pi.rev()(ls)
 end
 
+function func.contains(ls, e)
+    return func.pi.contains(e)(ls)
+end
+
 function func.seq(from, to)
     local result = {}
     for i = from, to do

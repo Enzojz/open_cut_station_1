@@ -126,6 +126,15 @@ function pipe.range(from, to)
     end
 end
 
+function pipe.contains(e)
+    return function(ls)
+        for _, x in ipairs(ls) do 
+            if (x == e) then return true end 
+        end
+        return false
+    end
+end
+
 function pipe.max(less)
     return function(ls)
         return pipe.fold(ls[1], function(l, r) return less(l, r) and r or l end)(ls)

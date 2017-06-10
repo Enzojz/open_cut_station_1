@@ -4,6 +4,7 @@ local func = require "func"
 local coor = require "coor"
 local trackEdge = require "trackedge"
 local station = require "stationlib"
+local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
@@ -85,8 +86,6 @@ local buildStairs = function(seq, c, m, mr)
 end
 
 local buildAllStairs = function(config, xOffsets, uOffsets)
-    local offsetMax = func.max(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
-    local offsetMin = func.min(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x
     local zOffset = 0.8
     return
         func.flatten({
@@ -110,20 +109,99 @@ local buildAllStairs = function(config, xOffsets, uOffsets)
             end),
             func.mapFlatten(uOffsets, function(offset)
                 return
-                    buildStairs(
-                        func.map(func.filter(config, function(m) return m.delta.z > 0 end), function(_) return stairModels.base end),
-                        coor.o,
-                        coor.transZ(-1 + zOffset) * coor.transX(offset.x)
-            )
+                    func.p
+                    * func.filter(config, function(m) return m.delta.z > 0 end)
+                    * func.pi.map(function(_) return stairModels.base end)
+                    * func.bind(buildStairs, nil, coor.o, coor.transZ(-1 + zOffset) * coor.transX(offset.x))
+                    / 0
             end
-            ),
-            {
-                newModel(fenceInter, coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth) * coor.transZ(zOffset)),
-                newModel(fenceInter, coor.transX(offsetMax + 0.5 * station.trackWidth) * coor.transZ(zOffset)),
-                newModel(fenceInter, coor.flipY(), coor.flipX(), coor.transX(offsetMin - 0.5 * station.trackWidth) * coor.transZ(zOffset)),
-                newModel(fenceInter, coor.flipY(), coor.transX(offsetMax + 0.5 * station.trackWidth) * coor.transZ(zOffset))
-            }
+        )
         })
+end
+
+local buildPass = function(config, xOffsets, uOffsets, pos)
+    local offsets = func.concat(xOffsets, uOffsets)
+    local zOffset = 0.8
+    
+    return func.mapFlatten(pos, function(p)
+        local pos, r = table.unpack(p)
+        pos = station.segmentLength * pos
+        local n, p = pos - r + 1, pos + r - 1
+        return
+            func.flatten({
+                func.p
+                * func.seq(n, p)
+                * func.pi.mapFlatten(function(yOffset)
+                    return
+                        func.mapFlatten(offsets, function(offset)
+                            return {
+                                newModel(stairModels.int.model, coor.trans(coor.xyz(offset.x, yOffset, zOffset))),
+                                newModel(stairModels.int.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, yOffset, zOffset))),
+                            }
+                        end)
+                end)
+                / 0,
+                
+                func.mapFlatten(offsets, function(offset)
+                    return {
+                        newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, n - 0.5, zOffset))),
+                        newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, p + 0.5, zOffset))),
+                    }
+                end),
+                
+                func.mapFlatten(uOffsets, function(offset)
+                    return
+                        func.p
+                        * func.filter(config, function(m) return m.delta.z > 0 end)
+                        * func.pi.map(function(_) return stairModels.base end)
+                        * func.bind(buildStairs, nil, coor.o, coor.trans(coor.xyz(offset.x, pos, -1 + zOffset)))
+                        / 0
+                end)
+            })
+    end
+)
+end
+
+local buildFences = function(xOffsets, uOffsets, nSeg, gaps)
+    local offsetMax = func.max(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x + 0.5 * station.trackWidth
+    local offsetMin = func.min(func.flatten({uOffsets, xOffsets}), function(l, r) return l.x < r.x end).x - 0.5 * station.trackWidth
+    local zOffset = 0.8
+    
+    local taken =
+        func.p
+        * func.mapFlatten(gaps,
+            function(p)
+                local pos, r = table.unpack(p)
+                return func.seqMap({-r, r}, function(p) return station.segmentLength * pos + p end)
+            end)
+        / 0
+    
+    local wallFences =
+        func.p
+        * func.seq(-nSeg * station.segmentLength * 0.5 + 1, nSeg * station.segmentLength * 0.5 - 1)
+        * func.pi.filter(function(p) return not func.contains(taken, p) end)
+        * func.pi.mapFlatten(function(i) return {{x = offsetMin + 0.35 - 1, n = i}, {x = offsetMax - 0.35 + 1, n = i}} end)
+        * func.pi.map(function(v) return {v.x, v.n, zOffset} end)
+        * func.pi.map(function(v) return newModel(fence, coor.rotZ(math.pi * 0.5), coor.trans(coor.xyz(table.unpack(v)))) end)
+        / 0
+    
+    local angleFences =
+        func.p
+        * func.mapFlatten(gaps,
+            function(p)
+                local pos, r = table.unpack(p)
+                local n, p = station.segmentLength * pos - r + 1, station.segmentLength * pos + r - 1
+                return
+                    {
+                        newModel(fenceInter, coor.flipX(), coor.trans(coor.xyz(offsetMin, p, zOffset))),
+                        newModel(fenceInter, coor.flipY(), coor.flipX(), coor.trans(coor.xyz(offsetMin, n, zOffset))),
+                        newModel(fenceInter, coor.trans(coor.xyz(offsetMax, p, zOffset))),
+                        newModel(fenceInter, coor.flipY(), coor.trans(coor.xyz(offsetMax, n, zOffset)))
+                    }
+            end)
+        / 0
+    
+    return func.concat(wallFences, angleFences)
 end
 
 local function snapRule(n) return function(e) return func.filter(func.seq(0, #e - 1), function(i) return (i > n) and (i - 3) % 4 == 0 end) end end
@@ -284,21 +362,14 @@ local function updateFn(config)
                 ) end)
                 / 0
             
-            local wallFences =
-                func.p
-                * func.seq(2, nSeg * station.segmentLength * 0.5 - 2)
-                * func.pi.mapFlatten(function(i) return {{x = xMin + 0.35, n = i}, {x = xMax - 0.35, n = i}} end)
-                * func.pi.mapFlatten(function(v) return {{v.x, v.n + 0.75, 0.8}, {v.x, -v.n - 0.75, 0.8}} end)
-                * func.pi.map(function(v) return newModel(fence, coor.rotZ(math.pi * 0.5), coor.trans(coor.xyz(table.unpack(v)))) end)
-                / 0
-            
             result.models = func.flatten(
                 {
                     station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0)),
                     sideWalls,
                     buildAllStairs(stairs, xOffsets, uOffsets),
+                    buildFences(xOffsets, uOffsets, nSeg, {{0, 1}, {2, 3}}),
+                    buildPass(stairs, xOffsets, uOffsets, {{2, 3}}),
                     {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 3.75))},
-                    wallFences
                 }
             )
             result.terminalGroups = station.makeTerminals(xuIndex)
