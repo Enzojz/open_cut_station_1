@@ -19,19 +19,18 @@ local stationlib = {
 
 stationlib.generateTrackGroups = function(xOffsets, length, extra)
     local halfLength = length * 0.5
-    extra = extra or { mpt = coor.I(), mvec = coor.I() }
-    return func.flatten(
-        func.map(xOffsets,
-            function(xOffset)
-                return coor.applyEdges(coor.mul(xOffset.parity, extra.mpt, xOffset.mpt), coor.mul(xOffset.parity, extra.mvec, xOffset.mvec))(
-                    {
-                        {{0, -halfLength, 0}, {0, halfLength, 0}},
-                        {{0, 0, 0}, {0, halfLength, 0}},
-                        {{0, 0, 0}, {0, halfLength, 0}},
-                        {{0, halfLength, 0}, {0, halfLength, 0}},
-                    })
-            end
-))
+    extra = extra or {mpt = coor.I(), mvec = coor.I()}
+    return func.mapFlatten(xOffsets,
+        function(xOffset)
+            return coor.applyEdges(coor.mul(xOffset.parity, extra.mpt, xOffset.mpt), coor.mul(xOffset.parity, extra.mvec, xOffset.mvec))(
+                {
+                    {{0, -halfLength, 0}, {0, halfLength, 0}},
+                    {{0, 0, 0}, {0, halfLength, 0}},
+                    {{0, 0, 0}, {0, halfLength, 0}},
+                    {{0, halfLength, 0}, {0, halfLength, 0}},
+                })
+        end
+)
 end
 
 stationlib.preBuild = function(totalTracks, baseX, ignoreFst, ignoreLst)
@@ -162,7 +161,7 @@ stationlib.setHeight = function(result, height)
     result.edgeLists = func.map(result.edgeLists, mapEdgeList)
     
     local mapModel = function(model)
-        model.transf = model.transf *  mpt
+        model.transf = model.transf * mpt
         return model
     end
     

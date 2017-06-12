@@ -25,7 +25,6 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
-
 local func = {}
 
 func.pi = require "pipe"
@@ -146,31 +145,48 @@ end
 
 local pipeMeta = {
     __mul = function(lhs, rhs)
-        local result = {op = {rhs(lhs())}}
+        local result = rhs(lhs)
+        setmetatable(result, getmetatable(lhs))
+        return result
+    end
+    ,
+    __add = function(lhs, rhs)
+        local result = func.concat(lhs, rhs)
+        setmetatable(result, getmetatable(lhs))
+        return result
+    end,
+    __div = function(lhs, rhs)
+        local result = func.concat(lhs, {rhs})
         setmetatable(result, getmetatable(lhs))
         return result
     end
     ,
     __call = function(r)
-        return table.unpack(r.op)
-    end
-    ,
-    __div = function(r, _)
-        return table.unpack(r.op)
+        return setmetatable(r, nil)
     end
 }
 
 func.p = {}
-pMeta = {
-    __mul = function(_, rhs)
-        local result = {op = {rhs}}
-        setmetatable(result, pipeMeta)
-        return result
-    end
-}
-setmetatable(func.p, pMeta)
+setmetatable(func.p,
+    {
+        __mul = function(_, rhs)
+            setmetatable(rhs, pipeMeta)
+            return rhs
+        end,
+        __add = function(_, rhs)
+            setmetatable(rhs, pipeMeta)
+            return rhs
+        end,
+        __div = function(_, rhs)
+            local result = {rhs}
+            setmetatable(result, pipeMeta)
+            return result
+        end
+    }
+)
 func.nop = function(x) return x end
 func.b = func.bind
+
 
 
 return func
