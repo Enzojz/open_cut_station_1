@@ -11,6 +11,11 @@ local heightList = {-8, -10, -12}
 local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
 
 local tramType = {"NO", "YES", "ELECTRIC"}
+local streetProfile = {
+    {6, "new_small.lua"},
+    {9, "new_medium.lua"},
+    {12, "new_large.lua"}
+}
 
 local stairModels = {
     last = {
@@ -97,17 +102,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local offsetMin = func.min(offsets, function(l, r) return l.x < r.x end).x - 0.5 * station.trackWidth
     local zOffset = 0.8
     
+    
     local retrivePos = function(p)
-        local pos, r = table.unpack(p)
-        local profile = {
-            {1, nil},
-            {6, "new_small.lua"},
-            {9, "new_medium.lua"},
-            {12, "new_large.lua"}
-        }
-        local r, t = table.unpack(profile[r])
+        local pos, w = table.unpack(p)
         pos = station.segmentLength * pos
-        return pos, pos - r + 1, pos + r - 1, t
+        return pos, pos - w + 1, pos + w - 1
     end
     
     local buildAllStairs = function()
@@ -118,48 +117,85 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + func.mapFlatten(uOffsets, function(offset)
                 return buildStairs(config, coor.o, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, -0.5, zOffset)))
             end)
-            + func.mapFlatten(xOffsets, function(offset)
-                return {
+            + func.mapFlatten(xOffsets, function(offset) return
+                {
                     newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, -0.5, zOffset))),
                     newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, 0.5, zOffset))),
                 }
             end)
-            + func.mapFlatten(func.concat(xOffsets, uOffsets), function(offset)
-                return {
+            + func.mapFlatten(func.concat(xOffsets, uOffsets), function(offset) return
+                {
                     newModel(stairModels.int.model, coor.transX(offset.x) * coor.transZ(zOffset)),
                     newModel(stairModels.int.model, coor.rotZ(math.pi) * coor.transX(offset.x) * coor.transZ(zOffset)),
                 }
             end)
-            + func.mapFlatten(uOffsets, function(offset)
-                return
-                    func.p
-                    * func.filter(config, function(m) return m.delta.z > 0 end)
-                    * func.pi.map(function(_) return stairModels.base end)
-                    * func.bind(buildStairs, nil, coor.o, coor.transZ(-1 + zOffset) * coor.transX(offset.x))
-            
-            end
-    )
+            + func.mapFlatten(uOffsets, function(offset) return
+                func.p
+                * func.filter(config, function(m) return m.delta.z > 0 end)
+                * func.pi.map(function(_) return stairModels.base end)
+                * func.bind(buildStairs, nil, coor.o, coor.transZ(-1 + zOffset) * coor.transX(offset.x))
+            end)
     end
     
-    local buildPassStreet = function(p)
-        local pos, _, _, type = retrivePos(p)
-        local _, _, tramType = table.unpack(p)
-        return {
-            type = "STREET",
-            alignTerrain = false,
-            params =
-            {
-                type = type,
-                tramTrackType = tramType
-            },
-            edges = coor.make(
-                {
-                    {{offsetMin - 3, pos, 0.8}, {0, pos, 0.8}, {1, 0, 0}, {1, 0, 0}},
-                    {{0, pos, 0.8}, {offsetMax + 3, pos, 0.8}, {1, 0, 0}, {1, 0, 0}}
+    local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideL, sideR)
+        local passEdges = func.mapFlatten(overpasses,
+            function(overpass)
+                local pos, _ = retrivePos(overpass)
+                return {
+                    {{offsetMin - 1 - w, pos, 0.8}, {0, pos, 0.8}, {1, 0, 0}, {1, 0, 0}},
+                    {{0, pos, 0.8}, {offsetMax + 1 + w, pos, 0.8}, {1, 0, 0}, {1, 0, 0}}
                 }
-            ),
-            snapNodes = {3, 0}
+            end)
+        
+        local yOffsets = func.p
+            + {-length * 0.5}
+            + func.map(overpasses, retrivePos)
+            + {length * 0.5}
+        
+        local sideEdges = func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
+            function(f, t) return {{offsetMax + 1 + w, f, 0.8}, {offsetMax + 1 + w, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end
+        )
+        return {
+            {
+                type = "STREET",
+                alignTerrain = false,
+                params = {
+                    type = type,
+                    tramTrackType = tramTrack
+                },
+                edges = coor.make(sideEdges),
+                snapNodes = {}
+            },
+            {
+                type = "STREET",
+                alignTerrain = false,
+                params = {
+                    type = type,
+                    tramTrackType = tramTrack
+                },
+                edges = coor.make(passEdges),
+                snapNodes = {}
+            }
         }
+    end
+    
+    local buildSideStreet = function(xOffset, yOffsets, group, tramType)
+        local w, type = table.unpack(streetProfile[group])
+        return
+            {
+                type = "STREET",
+                alignTerrain = false,
+                params = {
+                    type = type,
+                    tramTrackType = tramType
+                },
+                edges = func.p
+                * func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
+                    function(f, t) return {{xOffset, f, 0.8}, {xOffset, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end
+                )
+                * coor.make,
+                snapNodes = {}
+            }
     end
     
     local buildPass = function(pos)
@@ -226,7 +262,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     
     end
     
-    return offsetMin, offsetMax, buildAllStairs, buildPass, buildFences, buildPassStreet
+    return offsetMin, offsetMax, buildAllStairs, buildPass, buildFences, buildPassStreet, buildSideStreet
 end
 
 local function snapRule(n) return function(e) return func.filter(func.seq(0, #e - 1), function(i) return (i > n) and (i - 3) % 4 == 0 end) end end
@@ -259,33 +295,27 @@ local function params()
             defaultIndex = 0
         },
         {
-            key = "overpass1",
-            name = _("Overpass 1"),
-            values = {_("No"), _("Yes"), _("Tram"), _("Electric")},
+            key = "overpass",
+            name = _("Overpasses"),
+            values = {_("None"), _("A"), _("B"), _("A + B")},
             defaultIndex = 0
         },
         {
-            key = "overpass2",
-            name = _("Overpass 2"),
-            values = {_("No"), _("Yes"), _("Tram"), _("Electric")},
+            key = "sideroad",
+            name = _("Side Roads"),
+            values = {_("None"), _("A"), _("B"), _("A + B")},
             defaultIndex = 0
         },
+        paramsutil.makeTramTrackParam1(),
+        paramsutil.makeTramTrackParam2(),
         {
-            key = "sideroad1",
-            name = _("Side Road 1"),
-            values = {_("No"), _("Yes"), _("Tram"), _("Electric")},
+            key = "streetType",
+            name = _("Street Type"),
+            values = {_("S"), _("M"), _("L")},
             defaultIndex = 0
         },
-        {
-            key = "sideroad2",
-            name = _("Side Road 2"),
-            values = {_("No"), _("Yes"), _("Tram"), _("Electric")},
-            defaultIndex = 0
-        }
     }
 end
-
-
 
 local function defaultParams(params)
     params.trackType = params.trackType or 0
@@ -298,7 +328,6 @@ local function defaultParams(params)
 end
 
 local function updateFn(config)
-    
     local platformPatterns = function(n)
         local platforms = func.seqMap({1, n}, function(_) return config.platformRepeat end)
         platforms[0.5 * n] = config.platformDwlink
@@ -313,7 +342,6 @@ local function updateFn(config)
     local sideWallFst = config.sideWallFst
     local sideWallLst = config.sideWallLst
     
-    
     local sideWallPatterns = function(n, triangle)
         local sideWalls = func.map(func.seq(1, n), function(i) return sideWall end)
         if (triangle) then
@@ -325,7 +353,6 @@ local function updateFn(config)
     
     return
         function(params)
-            
             local result = {}
             
             local trackType = ({"standard.lua", "high_speed.lua"})[params.trackType + 1]
@@ -334,27 +361,29 @@ local function updateFn(config)
             local length = nSeg * station.segmentLength
             local nbTracks = trackNumberList[params.nbTracks + 1]
             local height = heightList[params.platformHeight + 1]
+            local tramTrack = tramType[params.tramTrack + 1]
+            local streetWidth, streetType = table.unpack(streetProfile[params.streetType + 1])
             
             local platforms = platformPatterns(nSeg)
             local stairs = stairsConfig[params.platformHeight + 1]
             
-            local overpasses =
-                func.p
-                + (params.overpass1 > 0 and {{nSeg / 4 + 0.5, 3, tramType[params.overpass1]}} or {})
-                + (params.overpass2 > 0 and {{-nSeg / 4 - 0.5, 3, tramType[params.overpass2]}} or {})
+            local overpasses = func.p
+                + (params.overpass % 2 == 1 and {{-nSeg / 4 - 0.5, streetWidth}} or {})
+                + (params.overpass > 1 and {{nSeg / 4 + 0.5, streetWidth}} or {})
             
-            local levels = {
+            local levels =
                 {
-                    mz = coor.transZ(height),
-                    mr = coor.I(),
-                    mdr = coor.I(),
-                    id = 1,
-                    nbTracks = nbTracks,
-                    baseX = 0,
-                    ignoreFst = ({true, false, true, false})[params.trackLayout + 1],
-                    ignoreLst = (nbTracks % 2 == 0 and {false, false, true, true} or {true, true, false, false})[params.trackLayout + 1],
+                    {
+                        mz = coor.transZ(height),
+                        mr = coor.I(),
+                        mdr = coor.I(),
+                        id = 1,
+                        nbTracks = nbTracks,
+                        baseX = 0,
+                        ignoreFst = ({true, false, true, false})[params.trackLayout + 1],
+                        ignoreLst = (nbTracks % 2 == 0 and {false, false, true, true} or {true, true, false, false})[params.trackLayout + 1],
+                    }
                 }
-            }
             
             local xOffsets, uOffsets, xuIndex, xParity = station.buildCoors(nSeg)(levels, {}, {}, {}, {})
             
@@ -372,7 +401,7 @@ local function updateFn(config)
             local ext1 = coor.applyEdges(coor.transY(length * 0.5 + 5), coor.I())(station.generateTrackGroups(func.map(xOffsets, resetParity), 10))
             local ext2 = coor.applyEdges(coor.flipY(), coor.flipY())(ext1)
             
-            local xMin, xMax, buildAllStairs, buildPass, buildFences, buildPassStreet = makeBuilders(stairs, xOffsets, uOffsets)
+            local xMin, xMax, buildAllStairs, buildPass, buildFences, buildPassStreet, buildSideStreet = makeBuilders(stairs, xOffsets, uOffsets)
             local yMin = -0.5 * length - 20
             local yMax = -yMin
             
@@ -393,8 +422,7 @@ local function updateFn(config)
                         snapNodes = {1}
                     }
                 }
-                + func.map(overpasses, buildPassStreet)
-            
+                + buildPassStreet(streetWidth, streetType, tramTrack, length, overpasses)
             
             local sideWalls =
                 func.p
@@ -470,8 +498,6 @@ local function updateFn(config)
                 }
             }
             
-            
-            -- func.forEach(entryLocations, func.bind(addEntry, result))
             result.cost = 60000 + nbTracks * 24000
             result.maintenanceCost = result.cost / 6
             
