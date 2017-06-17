@@ -128,8 +128,8 @@ end
 
 function pipe.contains(e)
     return function(ls)
-        for _, x in ipairs(ls) do 
-            if (x == e) then return true end 
+        for _, x in ipairs(ls) do
+            if (x == e) then return true end
         end
         return false
     end
@@ -172,6 +172,61 @@ function pipe.rev()
         end
         return result
     end
+end
+
+
+local pipeMeta = {
+    __mul = function(lhs, rhs)
+        local result = rhs(lhs)
+        setmetatable(result, getmetatable(lhs))
+        return result
+    end
+    ,
+    __add = function(lhs, rhs)
+        local result = pipe.concat(rhs)(lhs)
+        setmetatable(result, getmetatable(lhs))
+        return result
+    end,
+    __div = function(lhs, rhs)
+        local result = pipe.concat({rhs})(lhs)
+        setmetatable(result, getmetatable(lhs))
+        return result
+    end
+    ,
+    __call = function(r)
+        return setmetatable(r, nil)
+    end
+}
+
+pipe.new = {}
+setmetatable(pipe.new,
+    {
+        __mul = function(_, rhs)
+            setmetatable(rhs, pipeMeta)
+            return rhs
+        end,
+        __add = function(_, rhs)
+            setmetatable(rhs, pipeMeta)
+            return rhs
+        end,
+        __div = function(_, rhs)
+            local result = {rhs}
+            setmetatable(result, pipeMeta)
+            return result
+        end
+    }
+)
+pipe.from = function(...)
+    local retVal = {...}
+    setmetatable(retVal,
+        {
+            __mul = function(lhs, rhs)
+                local result = rhs(table.unpack(lhs))
+                setmetatable(result, pipeMeta)
+                return result
+            end
+        })
+    return retVal
 end
 
 return pipe

@@ -113,15 +113,6 @@ function func.seqMap(range, fun)
     return func.map(func.seq(table.unpack(range)), fun)
 end
 
-function func.pipe(op, f, ...)
-    local rest = {...}
-    if (#rest > 0) then
-        return func.pipe(f(op), ...)
-    else
-        return f(op)
-    end
-end
-
 function func.bind(fun, ...)
     local rest = {...}
     return function(...)
@@ -138,52 +129,8 @@ function func.bind(fun, ...)
     end
 end
 
-function func.exec(...)
-    local rest = {...}
-    return function(p) return func.pipe(p, table.unpack(rest)) end
-end
+func.p = func.pi.new
 
-local pipeMeta = {
-    __mul = function(lhs, rhs)
-        local result = rhs(lhs)
-        setmetatable(result, getmetatable(lhs))
-        return result
-    end
-    ,
-    __add = function(lhs, rhs)
-        local result = func.concat(lhs, rhs)
-        setmetatable(result, getmetatable(lhs))
-        return result
-    end,
-    __div = function(lhs, rhs)
-        local result = func.concat(lhs, {rhs})
-        setmetatable(result, getmetatable(lhs))
-        return result
-    end
-    ,
-    __call = function(r)
-        return setmetatable(r, nil)
-    end
-}
-
-func.p = {}
-setmetatable(func.p,
-    {
-        __mul = function(_, rhs)
-            setmetatable(rhs, pipeMeta)
-            return rhs
-        end,
-        __add = function(_, rhs)
-            setmetatable(rhs, pipeMeta)
-            return rhs
-        end,
-        __div = function(_, rhs)
-            local result = {rhs}
-            setmetatable(result, pipeMeta)
-            return result
-        end
-    }
-)
 func.nop = function(x) return x end
 func.b = func.bind
 
