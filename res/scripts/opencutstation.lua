@@ -140,55 +140,64 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             end)
     end
     
-    local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideL, sideR)
+    local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideA, sideB)
+        local toEdge = function(o, vec) return {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()} end
+        
         local passEdges = func.mapFlatten(overpasses,
             function(overpass)
                 local pos, _ = retrivePos(overpass)
-                return {
-                    {{offsetMin - 2 - w, pos, 0.8}, {0, pos, 0.8}, {1, 0, 0}, {1, 0, 0}},
-                    {{0, pos, 0.8}, {offsetMax + 2 + w, pos, 0.8}, {1, 0, 0}, {1, 0, 0}}
-                }
+                return
+                    pipe.from(coor.xyz(0, pos, 0.8), coor.xyz(offsetMin, 0, 0), coor.xyz(-2 - w, 0, 0))
+                    * function(o, vec, e) return {toEdge(o, vec), toEdge(o + vec, e)} end
+                    +
+                    pipe.from(coor.xyz(0, pos, 0.8), coor.xyz(offsetMax, 0, 0), coor.xyz(2 + w, 0, 0))
+                    * function(o, vec, e) return {toEdge(o, vec), toEdge(o + vec, e)} end
             end)
         
         local intersections = pipe.new * func.map(overpasses, retrivePos)
-        local yOffsets =
-            (
-            pipe.from(-length * 0.5 + 3 * w)
-            * function(p) return
-                intersections
-                * pipe.filter(function(p) return p < 0 end)
-                * function(ls) return #ls == 0 and {p} or (ls[1] > p + 1.5 * w and ls / p or ls) end
-            end
-            +
-            pipe.from(length * 0.5 - 3 * w)
-            * function(p) return
-                intersections
-                * pipe.filter(function(p) return p > 0 end)
-                * function(ls) return #ls == 0 and {p} or (ls[1] < p - 1.5 * w and ls / p or ls) end
-            end
-            )
-            * pipe.sort(function(x, y) return x < y end)
+        local yOffsetsB, yOffsetsA =
+            table.unpack(
+                (
+                pipe.from(-length * 0.5 + 3 * w)
+                * function(p) return
+                    intersections
+                    * pipe.filter(function(p) return p < 0 end)
+                    * function(ls) return #ls == 0 and {p} or (ls[1] > p + 1.5 * w and ls / p or ls) end
+                end
+                +
+                pipe.from(length * 0.5 - 3 * w)
+                * function(p) return
+                    intersections
+                    * pipe.filter(function(p) return p > 0 end)
+                    * function(ls) return #ls == 0 and {p} or (ls[1] < p - 1.5 * w and ls / p or ls) end
+                end
+                )
+                * function(yOffsets) return {yOffsets / 0, yOffsets + {-w, w}} end
+                * pipe.map(pipe.sort(function(x, y) return x < y end))
+        )
+        local xposA = offsetMin - 2 - w
+        local xposB = offsetMax + 2 + w
         
-        local xpos = offsetMax + 2 + w
+        local makeSide = function(xpos, yOffsets, fixed)
+            return
+             pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
+                * function(o, vec) return
+                    {
+                        toEdge(o, vec),
+                        toEdge(o + vec, vec * 0.25)
+                    }
+                end
+                + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
+                    function(f, t) return {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end)
+        end
+
+        local ignore = function(sw) return function(value) return sw and value or {} end end
+        
         local sideEdges = pipe.new
-            +
-            pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), coor.xyz(2 * w, -length * 0.5 - yOffsets[1], 0.4))
-            * function(o, vec) return
-                {
-                    {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()},
-                    {(o + vec):toTuple(), (o + vec * 1.25):toTuple(), vec:toTuple(), vec:toTuple()}
-                }
-            end
-            +
-            pipe.from(coor.xyz(xpos, yOffsets[#yOffsets], 0.8), coor.xyz(2 * w, length * 0.5 - yOffsets[#yOffsets], 0.4))
-            * function(o, vec) return
-                {
-                    {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()},
-                    {(o + vec):toTuple(), (o + vec * 1.25):toTuple(), vec:toTuple(), vec:toTuple()}
-                }
-            end
-            + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
-                function(f, t) return {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end)
+            + makeSide(xposA, func.filter(yOffsetsA, function(y) return y <= 0 end), coor.xyz(xposA - 2 * w, -length * 0.5, 0.16)) * ignore(sideA)
+            + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignore(sideA)
+            + makeSide(xposB, func.filter(yOffsetsB, function(y) return y <= 0 end), coor.xyz(xposB + 2 * w, -length * 0.5, 0.16)) * ignore(sideB)
+            + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignore(sideB)
         return {
             {
                 type = "STREET",
@@ -198,7 +207,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     tramTrackType = tramTrack
                 },
                 edges = coor.make(sideEdges),
-                snapNodes = {3, 7}
+                snapNodes = {}
             },
             {
                 type = "STREET",
@@ -208,7 +217,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     tramTrackType = tramTrack
                 },
                 edges = coor.make(passEdges),
-                snapNodes = pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return {i * 4} end)
+                snapNodes = {}--pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return {i * 8 + 3} end)
             }
         }
     end
@@ -314,8 +323,8 @@ local function params()
             defaultIndex = 0
         },
         {
-            key = "sideroad",
-            name = _("Side Roads"),
+            key = "sidepass",
+            name = _("Side Passes"),
             values = {_("None"), _("A"), _("B"), _("A + B")},
             defaultIndex = 0
         },
@@ -417,6 +426,8 @@ local function updateFn(config)
                 + (func.contains({1, 3}, params.overpass) and {{-nSeg / 4 - 0.5, streetWidth}} or {})
                 + (func.contains({2, 3}, params.overpass) and {{nSeg / 4 + 0.5, streetWidth}} or {})
             
+            local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
+            
             result.edgeLists = pipe.new
                 + {
                     trackEdge.normal(catenary, trackType, false, snapRule(#normal))(pipe.new + normal + ext1 + ext2),
@@ -434,7 +445,7 @@ local function updateFn(config)
                         snapNodes = {1}
                     }
                 }
-                + buildPassStreet(streetWidth, streetType, tramTrack, length, overpasses)
+                + buildPassStreet(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
             
             local sideWalls =
                 pipe.new
