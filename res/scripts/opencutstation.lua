@@ -141,7 +141,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     end
     
     local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideA, sideB)
-        local toEdge = function(o, vec) return {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()} end
+        local toEdge = function(o, vec, iskey) return {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()} end
         
         local passEdges = func.mapFlatten(overpasses,
             function(overpass)
@@ -172,7 +172,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     * function(ls) return #ls == 0 and {p} or (ls[1] < p - 1.5 * w and ls / p or ls) end
                 end
                 )
-                * function(yOffsets) return {yOffsets / 0, yOffsets + {-w, w}} end
+                * function(yOffsets) return {yOffsets / 0, yOffsets + {-8 - w, 8 + w}} end
                 * pipe.map(pipe.sort(function(x, y) return x < y end))
         )
         local xposA = offsetMin - 2 - w
@@ -180,7 +180,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         
         local makeSide = function(xpos, yOffsets, fixed)
             return
-             pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
+                pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
                     {
                         toEdge(o, vec),
@@ -190,7 +190,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
                     function(f, t) return {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end)
         end
-
+        
         local ignore = function(sw) return function(value) return sw and value or {} end end
         
         local sideEdges = pipe.new
@@ -198,6 +198,12 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignore(sideA)
             + makeSide(xposB, func.filter(yOffsetsB, function(y) return y <= 0 end), coor.xyz(xposB + 2 * w, -length * 0.5, 0.16)) * ignore(sideB)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignore(sideB)
+            + ignore(sideA)(
+                {
+                    {{-17.25 + xposA - w, 0, 0.8}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}},
+                    {{-17.25 + xposA - w, 0, 0.8}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}},
+                    toEdge(coor.xyz(-17.25 + xposA - w, 0, 0.8), coor.xyz(-5 - w, 0, 0))
+                })
         return {
             {
                 type = "STREET",
@@ -217,7 +223,21 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     tramTrackType = tramTrack
                 },
                 edges = coor.make(passEdges),
-                snapNodes = {}--pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return {i * 8 + 3} end)
+                snapNodes = pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return pipe.new + (sideA and {} or {i * 8 + 3}) + (sideB and {} or {i * 8 + 7}) end)
+            },
+            {
+                type = "STREET",
+                params =
+                {
+                    type = "station_new_small.lua",
+                    tramTrackType = "NO"
+                },
+                edges = coor.make(
+                    {
+                        sideA and toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0.8)) or toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
+                    }
+                ),
+                snapNodes = sideA and {} or {1}
             }
         }
     end
@@ -429,22 +449,7 @@ local function updateFn(config)
             local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
             
             result.edgeLists = pipe.new
-                + {
-                    trackEdge.normal(catenary, trackType, false, snapRule(#normal))(pipe.new + normal + ext1 + ext2),
-                    {
-                        type = "STREET",
-                        params =
-                        {
-                            type = "station_new_small.lua",
-                            tramTrackType = "NO"
-                        },
-                        edges = {
-                            {{-17.25, 0, 0}, {-20, 0, 0}},
-                            {{-37.25, 0, 0}, {-20, 0, 0}}
-                        },
-                        snapNodes = {1}
-                    }
-                }
+                + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(pipe.new + normal + ext1 + ext2)}
                 + buildPassStreet(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
             
             local sideWalls =
