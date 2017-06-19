@@ -143,10 +143,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         local passEdges = func.mapFlatten(overpasses,
             function(overpass)
                 local pos, _ = retrivePos(overpass)
-                return
-                    station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMin, 0, 0), coor.xyz(-2 - w, 0, 0))
-                    +
-                    station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMax, 0, 0), coor.xyz(2 + w, 0, 0))
+                return station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMin, 0, 0), coor.xyz(-2 - w, 0, 0))
+                    + station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMax, 0, 0), coor.xyz(2 + w, 0, 0))
             end)
         
         local intersections = pipe.new * func.map(overpasses, retrivePos)
@@ -177,13 +175,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             return
                 pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
-                    {
-                        {edge = station.toEdge(o, vec), snap = {false, false}},
-                        {edge = station.toEdge(o + vec, vec * 0.25), snap = {false, true}}
-                    }
+                    station.toEdges(o, vec, vec * 0.25)
+                    * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s} end)
                 end
                 + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
-                    function(f, t) return {edge = {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}}, snap = {false, false}} end)
+                    function(f, t) return {edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)), snap = {false, false}} end)
         end
         
         local ignore = function(sw) return function(value) return sw and value or {} end end
@@ -195,9 +191,9 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignore(sideB)
             + ignore(sideA)(
                 {
-                    {edge = {{-17.25 + xposA - w, 0, 0.8}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}},
-                    {edge = {{-17.25 + xposA - w, 0, 0.8}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}},
-                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0.8), coor.xyz(-5 - w, 0, 0)), snap = {false, true}}
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}},
+                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-5 - w, 0, 0)), snap = {false, true}}
                 })
         
         return {
@@ -207,7 +203,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     type = type,
                     tramTrackType = tramTrack
                 },
-                edges = coor.make(sideEdges * pipe.map(pipe.select("edge"))),
+                edges = sideEdges * pipe.map(pipe.select("edge")) * coor.make,
                 snapNodes = sideEdges
                 * pipe.map(pipe.select("snap"))
                 * pipe.flatten()
@@ -223,7 +219,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     tramTrackType = tramTrack
                 },
                 edges = coor.make(passEdges),
-                snapNodes ={} -- pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return pipe.new + (sideA and {} or {i * 8 + 3}) + (sideB and {} or {i * 8 + 7}) end)
+                snapNodes = pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return pipe.new + (sideA and {} or {i * 8 + 3}) + (sideB and {} or {i * 8 + 7}) end)
             },
             {
                 type = "STREET",
@@ -234,7 +230,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 },
                 edges = coor.make(
                     {
-                        sideA and station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0.8)) or station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
+                        sideA and station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0)) or station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
                     }
                 ),
                 snapNodes = sideA and {} or {1}
