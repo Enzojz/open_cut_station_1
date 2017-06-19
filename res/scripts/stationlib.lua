@@ -186,5 +186,20 @@ stationlib.toEdges = function(o, ...)
     return edgesBuilder(pipe.new, o, ...)
 end
 
+local snapNodes = function(edges)
+    return edges
+        * pipe.map(pipe.select("snap"))
+        * pipe.flatten()
+        * function(ls) return ls * pipe.map2(func.seq(0, #ls - 1), function(s, n) return {snap = s, index = n} end) end
+        * pipe.filter(pipe.select("snap"))
+        * pipe.map(pipe.select("index"))
+end
+
+stationlib.prepareEdges = function(edges)
+    return {
+        edges = edges * pipe.map(pipe.select("edge")) * coor.make,
+        snapNodes = snapNodes(edges)
+    }
+end
 
 return stationlib

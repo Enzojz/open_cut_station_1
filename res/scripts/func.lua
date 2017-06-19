@@ -1,5 +1,5 @@
 --[[
-Copyright (c) 2016 "Enzojz" from www.transportfever.net
+Copyright (c) 2017 "Enzojz" from www.transportfever.net
 (https://www.transportfever.net/index.php/User/27218-Enzojz/)
 
 Github repository:
@@ -128,6 +128,7 @@ function func.bind(fun, ...)
         return fun(table.unpack(func.concat(args, param)))
     end
 end
+
 
 func.p = func.pi.new
 

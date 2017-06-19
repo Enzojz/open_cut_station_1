@@ -1,5 +1,5 @@
 --[[
-Copyright (c) 2016 "Enzojz" from www.transportfever.net
+Copyright (c) 2017 "Enzojz" from www.transportfever.net
 (https://www.transportfever.net/index.php/User/27218-Enzojz/)
 
 Github repository:
@@ -177,6 +177,13 @@ end
 function pipe.select(name)
     return function(el)
         return el[name]
+    end
+end
+
+function pipe.exec(...)
+    local params = {...}
+    return function(fn)
+        return fn(table.unpack(params))
     end
 end
 
