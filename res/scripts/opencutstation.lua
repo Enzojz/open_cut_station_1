@@ -5,7 +5,6 @@ local pipe = require "pipe"
 local coor = require "coor"
 local trackEdge = require "trackedge"
 local station = require "stationlib"
-local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
@@ -141,17 +140,13 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     end
     
     local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideA, sideB)
-        local toEdge = function(o, vec, iskey) return {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()} end
-        
         local passEdges = func.mapFlatten(overpasses,
             function(overpass)
                 local pos, _ = retrivePos(overpass)
                 return
-                    pipe.from(coor.xyz(0, pos, 0.8), coor.xyz(offsetMin, 0, 0), coor.xyz(-2 - w, 0, 0))
-                    * function(o, vec, e) return {toEdge(o, vec), toEdge(o + vec, e)} end
+                    station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMin, 0, 0), coor.xyz(-2 - w, 0, 0))
                     +
-                    pipe.from(coor.xyz(0, pos, 0.8), coor.xyz(offsetMax, 0, 0), coor.xyz(2 + w, 0, 0))
-                    * function(o, vec, e) return {toEdge(o, vec), toEdge(o + vec, e)} end
+                    station.toEdges(coor.xyz(0, pos, 0.8), coor.xyz(offsetMax, 0, 0), coor.xyz(2 + w, 0, 0))
             end)
         
         local intersections = pipe.new * func.map(overpasses, retrivePos)
@@ -183,12 +178,12 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
                     {
-                        toEdge(o, vec),
-                        toEdge(o + vec, vec * 0.25)
+                        {edge = station.toEdge(o, vec), snap = {false, false}},
+                        {edge = station.toEdge(o + vec, vec * 0.25), snap = {false, true}}
                     }
                 end
                 + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
-                    function(f, t) return {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}} end)
+                    function(f, t) return {edge = {{xpos, f, 0.8}, {xpos, t, 0.8}, {0, t - f, 0}, {0, t - f, 0}}, snap = {false, false}} end)
         end
         
         local ignore = function(sw) return function(value) return sw and value or {} end end
@@ -200,20 +195,25 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignore(sideB)
             + ignore(sideA)(
                 {
-                    {{-17.25 + xposA - w, 0, 0.8}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}},
-                    {{-17.25 + xposA - w, 0, 0.8}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}},
-                    toEdge(coor.xyz(-17.25 + xposA - w, 0, 0.8), coor.xyz(-5 - w, 0, 0))
+                    {edge = {{-17.25 + xposA - w, 0, 0.8}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}},
+                    {edge = {{-17.25 + xposA - w, 0, 0.8}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}},
+                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0.8), coor.xyz(-5 - w, 0, 0)), snap = {false, true}}
                 })
+        
         return {
             {
                 type = "STREET",
-                -- alignTerrain = false,
                 params = {
                     type = type,
                     tramTrackType = tramTrack
                 },
-                edges = coor.make(sideEdges),
-                snapNodes = {}
+                edges = coor.make(sideEdges * pipe.map(pipe.select("edge"))),
+                snapNodes = sideEdges
+                * pipe.map(pipe.select("snap"))
+                * pipe.flatten()
+                * function(ls) return ls * pipe.map2(func.seq(0, #ls - 1), function(s, n) return {snap = s, index = n} end) end
+                * pipe.filter(pipe.select("snap"))
+                * pipe.map(pipe.select("index"))
             },
             {
                 type = "STREET",
@@ -223,18 +223,18 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     tramTrackType = tramTrack
                 },
                 edges = coor.make(passEdges),
-                snapNodes = pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return pipe.new + (sideA and {} or {i * 8 + 3}) + (sideB and {} or {i * 8 + 7}) end)
+                snapNodes ={} -- pipe.new * func.seq(0, #overpasses - 1) * pipe.mapFlatten(function(i) return pipe.new + (sideA and {} or {i * 8 + 3}) + (sideB and {} or {i * 8 + 7}) end)
             },
             {
                 type = "STREET",
                 params =
                 {
                     type = "station_new_small.lua",
-                    tramTrackType = "NO"
+                    tramTrackType = tramTrack
                 },
                 edges = coor.make(
                     {
-                        sideA and toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0.8)) or toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
+                        sideA and station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0.8)) or station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
                     }
                 ),
                 snapNodes = sideA and {} or {1}

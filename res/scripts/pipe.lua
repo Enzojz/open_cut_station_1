@@ -174,6 +174,12 @@ function pipe.rev()
     end
 end
 
+function pipe.select(name)
+    return function(el)
+        return el[name]
+    end
+end
+
 
 local pipeMeta = {
     __mul = function(lhs, rhs)

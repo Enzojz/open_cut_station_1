@@ -1,4 +1,5 @@
 local func = require "func"
+local pipe = require "pipe"
 local coor = require "coor"
 local trackEdge = require "trackedge"
 
@@ -172,6 +173,17 @@ stationlib.faceMapper = function(m)
     return function(face)
         return func.map(face, function(pt) return (coor.tuple2Vec(pt) .. m):toTuple() end)
     end
+end
+
+stationlib.toEdge = function(o, vec) return {o:toTuple(), (o + vec):toTuple(), vec:toTuple(), vec:toTuple()} end
+
+local function edgesBuilder(result, o, vec, ...)
+    local vecs = {...}
+    return #vecs == 0 and result / stationlib.toEdge(o, vec) or edgesBuilder(result / stationlib.toEdge(o, vec), o + vec, ...)
+end
+
+stationlib.toEdges = function(o, ...)
+    return edgesBuilder(pipe.new, o, ...)
 end
 
 
