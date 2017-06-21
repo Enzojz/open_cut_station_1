@@ -5,7 +5,6 @@ local pipe = require "opencut/pipe"
 local coor = require "opencut/coor"
 local trackEdge = require "opencut/trackedge"
 local station = require "opencut/stationlib"
-local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
