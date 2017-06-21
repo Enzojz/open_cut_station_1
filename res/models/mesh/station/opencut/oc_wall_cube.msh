@@ -9,7 +9,7 @@ function data() return
               position = { count = 144, offset = 1728 }, 
               tangent = { count = 144, offset = 1728 }, 
               uv0 = { count = 144, offset = 1728 }, 
-             }, materials = { "concrete.mtl" }
+             }, materials = { "station/opencut/concrete.mtl" }
          }
        }, 
     vertexAttr = 

@@ -99,6 +99,8 @@ local buildStairs = function(seq, c, m, mr)
     return build({}, func.rev(seq), c)
 end
 
+local ignoreIf = function(sw) return function(value) return sw and {} or value end end
+
 local retrivePos = function(p)
     local pos, w = table.unpack(p)
     pos = station.segmentLength * pos
@@ -141,8 +143,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local sidePassesLimits = function(w, length, overpasses)
         local intersections = pipe.new * func.map(overpasses, retrivePos)
         return
-            offsetMin - 2 - w,
-            offsetMax + 2 + w,
+            offsetMin - 1 - w,
+            offsetMax + 1 + w,
             (offsetMin + offsetMax) * 0.5,
             table.unpack(
                 (
@@ -179,14 +181,13 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     function(f, t) return {edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)), snap = {false, false}, align = false} end)
         end
         
-        local ignore = function(sw) return function(value) return sw and value or {} end end
         
         local edges = pipe.new
-            + makeSide(xposA, func.filter(yOffsetsA, function(y) return y <= 0 end), coor.xyz(xposA - 2 * w, -length * 0.5, 0.16)) * ignore(sideA)
-            + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignore(sideA)
-            + makeSide(xposB, func.filter(yOffsetsB, function(y) return y <= 0 end), coor.xyz(xposB + 2 * w, -length * 0.5, 0.16)) * ignore(sideB)
-            + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignore(sideB)
-            + ignore(sideA)(
+            + makeSide(xposA, func.filter(yOffsetsA, function(y) return y <= 0 end), coor.xyz(xposA - 2 * w, -length * 0.5, 0.16)) * ignoreIf(not sideA)
+            + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideA)
+            + makeSide(xposB, func.filter(yOffsetsB, function(y) return y <= 0 end), coor.xyz(xposB + 2 * w, -length * 0.5, 0.16)) * ignoreIf(not sideB)
+            + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideB)
+            + ignoreIf(not sideA)(
                 {
                     {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
                     {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
@@ -198,17 +199,17 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     return
                         pipe.from(uOffsets)
                         * pipe.map(pipe.select("x"))
-                        * pipe.concat({offsetMin, offsetMax, xposA, xposB})
+                        * pipe.concat({xposA, xposB})
                         * pipe.sort(function(x, y) return x < y end)
                         * function(offsets) return func.map2(func.range(offsets, 1, #offsets - 1), func.range(offsets, 2, #offsets),
                             function(f, t) return {edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)), snap = {false, false}, align = false} end)
                         end
-                        + station.toEdges(coor.xyz(xposA, pos, 0.8), coor.xyz(-2, 0, 0), coor.xyz(-2, 0, 0))
+                        + station.toEdges(coor.xyz(xposA, pos, 0.8), coor.xyz(-3, 0, 0), coor.xyz(-1, 0, 0))
                         * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
-                        * ignore(not sideA)
-                        + station.toEdges(coor.xyz(xposB, pos, 0.8), coor.xyz(2, 0, 0), coor.xyz(2, 0, 0))
+                        * ignoreIf(sideA)
+                        + station.toEdges(coor.xyz(xposB, pos, 0.8), coor.xyz(3, 0, 0), coor.xyz(1, 0, 0))
                         * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
-                        * ignore(not sideB)
+                        * ignoreIf(sideB)
                 end)
         
         local alignedEdges = edges * pipe.filter(function(e) return e.align end)
@@ -478,24 +479,37 @@ local function updateFn(config)
                 + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
             
             result.terminalGroups = station.makeTerminals(xuIndex)
-                        
+            
             local fPasses = pipe.from(sidePassesLimits(streetWidth, length, overpasses))
                 * function(xposA, xposB, _, y, _)
                     local passLength = y[#y] - y[1] + 2 * streetWidth
-                    local ignoreIf = function(c) return function(value) return c and {} or value end end
                     
                     return pipe.new
                         + overpasses
                         * pipe.map(retrivePos)
                         * pipe.map(function(pos) return station.surfaceOf(
-                            coor.xyz(xposB - xposA + 8, 2 * streetWidth, 1),
-                            coor.xyz(0.5 * (xposA + xposB), pos, 0.8)
+                            coor.xyz(4 + streetWidth, 2 * streetWidth, 1),
+                            coor.xyz(0.5 * (xposA - 4 + xposA + streetWidth), pos, 0.8)
                         ) end)
                         * ignoreIf(sideA)
                         
+                        + overpasses
+                        * pipe.map(retrivePos)
+                        * pipe.map(function(pos) return station.surfaceOf(
+                            coor.xyz(4 + streetWidth, 2 * streetWidth, 1),
+                            coor.xyz(0.5 * (xposB + 4 + xposB - streetWidth), pos, 0.8)
+                        ) end)
+                        * ignoreIf(sideB)
+                        
                         + station.surfaceOf(
-                            coor.xyz(2 * streetWidth, passLength, 1),
-                            coor.xyz(xMin - streetWidth - 2, 0, 0.8)
+                            coor.xyz(2 * streetWidth, passLength * 0.5 - 9 - 2 * streetWidth, 1),
+                            coor.xyz(xMin - streetWidth - 2, 9 + passLength * 0.25, 0.8)
+                        )
+                        * function(f) return sideA and {f} or {} end
+                        
+                        + station.surfaceOf(
+                            coor.xyz(2 * streetWidth, passLength * 0.5 - 9 - 2 * streetWidth, 1),
+                            coor.xyz(xMin - streetWidth - 2, -9 - passLength * 0.25, 0.8)
                         )
                         * function(f) return sideA and {f} or {} end
                         
