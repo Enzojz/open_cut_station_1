@@ -463,7 +463,6 @@ local function updateFn(config)
                 * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 1, s.y, height}}, {m = s.m, v = {xMax + 1, s.y, height}}} end)
                 * pipe.map(function(s)
                     return newModel(s.m,
-                        coor.scaleX(2),
                         coor.scaleZ((-height + 0.8) / 10),
                         coor.trans(coor.xyz(table.unpack(s.v)))
                 ) end)
@@ -478,14 +477,7 @@ local function updateFn(config)
                 + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 4.75))}
             
             result.terminalGroups = station.makeTerminals(xuIndex)
-            
-            local basePt = pipe.new * {
-                coor.xyz(-0.5, -0.5, 0),
-                coor.xyz(0.5, -0.5, 0),
-                coor.xyz(0.5, 0.5, 0),
-                coor.xyz(-0.5, 0.5, 0)
-            }
-            
+                        
             local fPasses = pipe.from(sidePassesLimits(streetWidth, length, overpasses))
                 * function(xposA, xposB, _, y, _)
                     local passLength = y[#y] - y[1] + 2 * streetWidth
@@ -494,51 +486,28 @@ local function updateFn(config)
                     return pipe.new
                         + overpasses
                         * pipe.map(retrivePos)
-                        * pipe.map(function(pos) return basePt
-                            * pipe.map(function(f) return (f ..
-                                coor.scaleX(xposB - xposA + 8)
-                                * coor.scaleY(2 * streetWidth)
-                                * coor.trans(coor.xyz(0.5 * (xposA + xposB), pos, 0.8))
-                                ):toTuple() end)
-                        end)
+                        * pipe.map(function(pos) return station.surfaceOf(
+                            coor.xyz(xposB - xposA + 8, 2 * streetWidth, 1),
+                            coor.xyz(0.5 * (xposA + xposB), pos, 0.8)
+                        ) end)
                         * ignoreIf(sideA)
                         
-                        + basePt
-                        * pipe.map(function(f) return (f ..
-                            coor.scaleX(2 * streetWidth)
-                            * coor.scaleY(passLength)
-                            * coor.transX(xMin - streetWidth - 2)
-                            * coor.transZ(0.8)):toTuple() end)
+                        + station.surfaceOf(
+                            coor.xyz(2 * streetWidth, passLength, 1),
+                            coor.xyz(xMin - streetWidth - 2, 0, 0.8)
+                        )
                         * function(f) return sideA and {f} or {} end
                         
-                        + overpasses
-                        * pipe.map(retrivePos)
-                        * pipe.map(function(pos) return basePt
-                            * pipe.map(function(f) return (f ..
-                                coor.scaleX(xposB - xposA + 8)
-                                * coor.scaleY(2 * streetWidth)
-                                * coor.trans(coor.xyz(0.5 * (xposA + xposB), pos, 0.8))
-                                ):toTuple() end)
-                        end)
-                        * ignoreIf(sideB)
-                        
-                        + basePt
-                        * pipe.map(function(f) return (f ..
-                            coor.scaleX(2 * streetWidth)
-                            * coor.scaleY(passLength)
-                            * coor.transX(xMax + streetWidth + 2)
-                            * coor.transZ(0.8)
-                            ):toTuple() end)
+                        + station.surfaceOf(
+                            coor.xyz(2 * streetWidth, passLength, 1),
+                            coor.xyz(xMax + streetWidth + 2, 0, 0.8)
+                        )
                         * function(f) return sideB and {f} or {} end
                 end
             
-            local fBase = func.map(basePt,
-                function(f) return (f .. coor.scaleX(xMax - xMin + 2) * coor.scaleY(yMax - yMin) * coor.transX((xMax + xMin) * 0.5) * coor.transZ(height)):toTuple() end)
-            local fOutter = func.map(basePt,
-                function(f) return (f .. coor.scaleX(xMax - xMin + 4) * coor.scaleY(yMax - yMin + 4) * coor.transX((xMax + xMin) * 0.5) * coor.transZ(0.8)):toTuple() end)
-            
-            local fHouse = func.map(basePt,
-                function(f) return (f .. coor.scaleX(18) * coor.scaleY(18) * coor.transX(-7.5)):toTuple() end)
+            local fBase = station.surfaceOf(coor.xyz(xMax - xMin + 2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
+            local fOutter = station.surfaceOf(coor.xyz(xMax - xMin + 4, yMax - yMin + 4, 0), coor.xyz((xMax + xMin) * 0.5, 0, 0.8))
+            local fHouse = station.surfaceOf(coor.xyz(18, 18, 0), coor.xyz(-7.5, 0, 0))
             
             result.groundFaces = {
                 {face = fBase, modes = {{type = "FILL", key = "industry_gravel_small_01"}}},

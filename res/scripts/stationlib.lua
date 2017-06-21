@@ -202,4 +202,19 @@ stationlib.prepareEdges = function(edges)
     }
 end
 
+stationlib.basePt = pipe.new * {
+    coor.xyz(-0.5, -0.5, 0),
+    coor.xyz(0.5, -0.5, 0),
+    coor.xyz(0.5, 0.5, 0),
+    coor.xyz(-0.5, 0.5, 0)
+}
+
+stationlib.surfaceOf = function(size, center, ...)
+    local tr = {...}
+    return stationlib.basePt
+        * pipe.map(function(f) return (f .. coor.scale(size) * coor.trans(center)) end)
+        * pipe.map(function(f) return func.fold(tr, f, function(v, m) return v .. m end) end)
+        * pipe.map(function(v) return v:toTuple() end)
+end
+
 return stationlib

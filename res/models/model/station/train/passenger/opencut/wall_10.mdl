@@ -16,7 +16,7 @@ function data()
                     {
                         id = "station/sunk/oc_wall_cube.msh",
                         transf = {
-                            1, 0, 0, 0,
+                            2, 0, 0, 0,
                             0,10, 0, 0,
                             0, 0,10, 0,
                             0, 0, 0, 1

@@ -1,10 +1,13 @@
 local coor = require("coor")
 local func = require("func")
 local pipe = require("pipe")
+local station = require("stationlib")
 
 local wallSegs = {1, 2, 3, 4, 5}
-local wallLength = 20
-local wallHeight = {5, 8.8, 10.8, 12.8, 15, 17.5, 20}
+local wallLength = 10
+local wallHeight = {0, 5, 8, 10, 12, 15, 17.5, 20}
+local heightAdj = {0, 0.5, 1, 2, 2.5, 3, 4, 5}
+local rTxtList = {"●", "●", "•", "∙", "0", "∙", "•", "●", "●"}
 
 local newModel = function(m, ...)
     return {
@@ -13,6 +16,10 @@ local newModel = function(m, ...)
     }
 end
 
+local rWall = "station/train/passenger/opencut/wall_10.mdl"
+local lWall = "station/train/passenger/opencut/wall_lst.mdl"
+local fWall = "station/train/passenger/opencut/wall_fst.mdl"
+local tWalls = {lWall, fWall}
 
 function data()
     
@@ -41,70 +48,128 @@ function data()
                 key = "wallHeight",
                 name = _("Wall height") .. "(m)",
                 values = func.map(func.map(wallHeight, math.floor), tostring),
-                defaultIndex = 3
+                defaultIndex = 4
             },
+            {
+                key = "heightAdj",
+                name = _("Height Adjustment") .. "(m)",
+                values = func.map(heightAdj, tostring),
+                defaultIndex = 0
+            },
+            {
+                key = "adjSide",
+                name = "",
+                values = {_("Left"), _("Right")},
+                defaultIndex = 0
+            },
+            {
+                key = "slope",
+                name = _("Slope"),
+                values = rTxtList,
+                defaultIndex = 4
+            },
+            {
+                key = "aligned",
+                name = _("Modify terrain"),
+                values = {_("Yes"), _("No")},
+                defaultIndex = 0
+            }
         },
         
         updateFn = function(params)
             local result = {}
             
-            local height = wallHeight[params.wallHeight + 1] + 0.5
+            local height = wallHeight[params.wallHeight + 1] + 1.3
             local nSeg = wallSegs[params.wallLength + 1]
-            local mSeg = math.ceil(height / 10)
-            local zDisp = height - mSeg * 10
+            local mSeg = math.ceil(height * 0.1)
+            local zHeight = (height / mSeg)
+            local zFactor = zHeight * 0.1
             local totalLength = wallLength * nSeg
+            local adjHeight = heightAdj[params.heightAdj + 1]
+            local segAdj = adjHeight / nSeg
             
+            local adjN = function(n) return (params.adjSide == 0) and n or nSeg - n + 1 end
+            local mShear = coor.shearZoX(({-0.075, -0.06, -0.04, -0.02, 0, 0.02, 0.04, 0.06, 0.075})[params.slope + 1])
             result.models =
                 pipe.new
-                * func.seq(0, mSeg - 1)
+                * func.seq(0, mSeg - 2)
                 * pipe.mapFlatten(function(m) return func.seqMap({1, nSeg}, function(n) return {m = m, n = n} end) end)
                 * pipe.map(function(v)
-                    return newModel("station/train/passenger/opencut/wall_20.mdl",
-                        coor.xXY(), coor.scaleY(2), coor.trans(coor.xyz((v.n - 0.5) * wallLength - 0.5 * totalLength, -3.5, zDisp + v.m * 10))
+                    return newModel(rWall, coor.xXY(), coor.scaleZ(zFactor), coor.trans(coor.xyz((v.n - 0.5) * wallLength - 0.5 * totalLength, -3.5, v.m * zHeight)), mShear
                 )
                 end)
+                +
+                pipe.new
+                * func.seq(1, nSeg)
+                * pipe.mapFlatten(function(n)
+                    return {
+                        newModel(rWall, coor.xXY(), coor.scaleZ((zHeight + (adjN(n) - 1) * segAdj) * 0.1), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -3.5, (mSeg - 1) * zHeight)), mShear),
+                        newModel(rWall, coor.xXY(), coor.scaleZ(0.5), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -3.5, -5)), mShear)
+                    }
+                
+                end)
+                +
+                pipe.new
+                * func.seq(1, nSeg)
+                * pipe.map(function(n) return
+                    newModel(tWalls[params.adjSide + 1], coor.xXY(),
+                        coor.scaleZ(segAdj * 0.1),
+                        coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -3.5, height + (adjN(n) - 1) * segAdj)),
+                        mShear
+                )
+                end)
+                * function(w) return params.heightAdj == 0 and {} or w end
+            
             
             local extWidth = 2 * height
             local slopeExt = height / (extWidth - 6)
             local yMin = -totalLength * 0.5
             local yMax = totalLength + yMin
-            result.terrainAlignmentLists = {
-                {
-                    type = "GREATER",
-                    faces = {{
-                        {yMin, -4, height},
-                        {yMin, -extWidth, height},
-                        {yMax, -extWidth, height},
-                        {yMax, -4, height},
+            result.terrainAlignmentLists =
+                params.aligned == 1
+                and {
+                    {
+                        type = "EQUAL",
+                        faces = {}
+                    }
+                }
+                or {
+                    {
+                        type = "GREATER",
+                        faces = {{
+                            {yMin, -4, height},
+                            {yMin, -extWidth, height},
+                            {yMax, -extWidth, height},
+                            {yMax, -4, height},
+                        },
+                        {
+                            {yMax, -4, height},
+                            {yMax, -extWidth, height},
+                            {yMax + extWidth - 6, -extWidth, 0},
+                            {yMax + extWidth - 6, -5, 0},
+                        },
+                        {
+                            {yMin - extWidth + 6, -5, 0},
+                            {yMin - extWidth + 6, -extWidth, 0},
+                            {yMin, -extWidth, height},
+                            {yMin, -4, height},
+                        }},
+                        slopeLow = 0,
+                        slopeHigh = 0,
                     },
                     {
-                        {yMax, -4, height},
-                        {yMax, -extWidth, height},
-                        {yMax + extWidth - 6, -extWidth, 0},
-                        {yMax + extWidth - 6, -5, 0},
+                        type = "GREATER",
+                        faces = {{
+                            {yMin, -extWidth, height},
+                            {yMin, -extWidth - 1, height},
+                            {yMax, -extWidth - 1, height},
+                            {yMax, -extWidth, height},
+                        },
+                        },
+                        slopeLow = slopeExt,
+                        slopeHigh = slopeExt,
                     },
-                    {
-                        {yMin - extWidth + 6, -5, 0},
-                        {yMin - extWidth + 6, -extWidth, 0},
-                        {yMin, -extWidth, height},
-                        {yMin, -4, height},
-                    }},
-                    slopeLow = 0,
-                    slopeHigh = 0,
-                },
-                {
-                    type = "GREATER",
-                    faces = {{
-                        {yMin, -extWidth, height},
-                        {yMin, -extWidth - 1, height},
-                        {yMax, -extWidth - 1, height},
-                        {yMax, -extWidth, height},
-                    },
-                    },
-                    slopeLow = slopeExt,
-                    slopeHigh = slopeExt,
-                },
-            }
+                }
             
             return result
         end

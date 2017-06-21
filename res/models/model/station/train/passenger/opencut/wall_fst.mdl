@@ -1,14 +1,24 @@
 function data()
     return {
+        boundingInfo = {
+            bbMax = { 1, 5, 10 },
+            bbMin = { -1, -5, 0 },
+        },
+        collider = {
+            params = {
+            
+            },
+            type = "MESH",
+        },
         lods = {
             {
                 children = {
                     {
-                        id = "station/sunk/sunk_side_wall_ext.msh",
+                        id = "station/sunk/oc_wall_prism.msh",
                         transf = {
-                            1, 0, 0, 0,
-                            0,-1, 0, 0,
-                            0, 0, 1, 0,
+                            2, 0, 0, 0,
+                            0,-10, 0, 0,
+                            0, 0,10, 0,
                             0, 0, 0, 1
                         },
                         type = "MESH",

@@ -303,24 +303,27 @@ function coor.scaleZ(sz)
     }
 end
 
-function coor.shearX(sx)
-    return init * {
-        1,sx, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    }
+function coor.scale(vec)
+    return coor.scaleX(vec.x) * coor.scaleY(vec.y) * coor.scaleZ(vec.z)
 end
 
-function coor.shearY(sy)
+function coor.shearXoY(s)
     return init * {
         1, 0, 0, 0,
-       sy, 1, 0, 0,
+        s, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     }
 end
 
+function coor.shearXoZ(s)
+    return init * {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        s, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
 
 function coor.mul(...)
     local params = {...}
@@ -329,6 +332,51 @@ function coor.mul(...)
         m = m * params[i]
     end
     return m
+end
+
+function coor.shearYoX(s)
+    return init * {
+        1, s, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+function coor.shearYoZ(s)
+    return init * {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, s, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+function coor.shearYoX(s)
+    return init * {
+        1, s, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+function coor.shearZoX(s)
+    return init * {
+        1, 0, s, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+function coor.shearZoY(s)
+    return init * {
+        1, 0, 0, 0,
+        0, 1, s, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
 end
 
 function coor.apply(vec, trans)
