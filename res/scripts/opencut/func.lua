@@ -27,7 +27,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 local func = {}
 
-func.pi = require "pipe"
+func.pi = require "opencut/pipe"
 
 function func.fold(ls, init, fun)
     return func.pi.fold(init, fun)(ls)

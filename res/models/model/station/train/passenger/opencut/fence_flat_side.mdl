@@ -1,5 +1,5 @@
 local laneutil = require "laneutil"
-local func = require "func"
+local func = require "opencut/func"
 function data()
     return {
         lods = {

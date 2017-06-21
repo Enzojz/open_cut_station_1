@@ -26,7 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
 local laneutil = require "laneutil"
-local func = require "func"
+local func = require "opencut/func"
 
 local coor = {}
 coor.make = laneutil.makeLanes

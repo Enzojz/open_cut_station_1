@@ -1,7 +1,7 @@
-local coor = require("coor")
-local func = require("func")
-local pipe = require("pipe")
-local station = require("stationlib")
+local coor = require("opencut/coor")
+local func = require("opencut/func")
+local pipe = require("opencut/pipe")
+local station = require("opencut/stationlib")
 
 local wallSegs = {1, 2, 3, 4, 5}
 local wallLength = 10

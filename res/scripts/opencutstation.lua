@@ -1,10 +1,10 @@
 local laneutil = require "laneutil"
 local paramsutil = require "paramsutil"
-local func = require "func"
-local pipe = require "pipe"
-local coor = require "coor"
-local trackEdge = require "trackedge"
-local station = require "stationlib"
+local func = require "opencut/func"
+local pipe = require "opencut/pipe"
+local coor = require "opencut/coor"
+local trackEdge = require "opencut/trackedge"
+local station = require "opencut/stationlib"
 local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
@@ -112,20 +112,21 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local offsetMax = func.max(offsets, function(l, r) return l.x < r.x end).x + 0.5 * station.trackWidth
     local offsetMin = func.min(offsets, function(l, r) return l.x < r.x end).x - 0.5 * station.trackWidth
     local zOffset = 0.8
-    local buildAllStairs = function()
+    
+    local buildSideStairs = function(pos, m)
         return pipe.new
             + func.mapFlatten(uOffsets, function(offset)
-                return buildStairs(config, coor.o, coor.trans(coor.xyz(offset.x, 0.5, zOffset)))
+                return buildStairs(config, coor.o, m * coor.trans(coor.xyz(offset.x, pos, zOffset)))
             end)
-            + func.mapFlatten(uOffsets, function(offset)
-                return buildStairs(config, coor.o, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, -0.5, zOffset)))
+            + func.map(xOffsets, function(offset)
+                return newModel(stairModels.side.model, coor.rotZ(math.pi) * m * coor.trans(coor.xyz(offset.x, pos, zOffset)))
             end)
-            + func.mapFlatten(xOffsets, function(offset) return
-                {
-                    newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, -0.5, zOffset))),
-                    newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, 0.5, zOffset))),
-                }
-            end)
+    end
+    
+    local buildAllStairs = function()
+        return pipe.new
+            + buildSideStairs(0.5, coor.I())
+            + buildSideStairs(-0.5, coor.rotZ(math.pi))
             + func.mapFlatten(func.concat(xOffsets, uOffsets), function(offset) return
                 {
                     newModel(stairModels.int.model, coor.transX(offset.x) * coor.transZ(zOffset)),
@@ -139,6 +140,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 * func.bind(buildStairs, nil, coor.o, coor.transZ(-1 + zOffset) * coor.transX(offset.x))
             end)
     end
+    
     
     local sidePassesLimits = function(w, length, overpasses)
         local intersections = pipe.new * func.map(overpasses, retrivePos)
@@ -260,6 +262,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                             }
                         end)
                 end)
+                -- + buildSideStairs(pos > 0 and t + 0.5 or f - 0.5, pos > 0 and coor.I() or coor.rotZ(math.pi))
                 + func.mapFlatten(offsets, function(offset) return
                     {
                         newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, f - 0.5, zOffset))),
