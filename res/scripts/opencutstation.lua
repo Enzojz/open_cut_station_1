@@ -5,6 +5,7 @@ local pipe = require "pipe"
 local coor = require "coor"
 local trackEdge = require "trackedge"
 local station = require "stationlib"
+local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
@@ -98,19 +99,17 @@ local buildStairs = function(seq, c, m, mr)
     return build({}, func.rev(seq), c)
 end
 
+local retrivePos = function(p)
+    local pos, w = table.unpack(p)
+    pos = station.segmentLength * pos
+    return pos, pos - w + 1, pos + w - 1
+end
+
 local makeBuilders = function(config, xOffsets, uOffsets)
     local offsets = func.concat(xOffsets, uOffsets)
     local offsetMax = func.max(offsets, function(l, r) return l.x < r.x end).x + 0.5 * station.trackWidth
     local offsetMin = func.min(offsets, function(l, r) return l.x < r.x end).x - 0.5 * station.trackWidth
     local zOffset = 0.8
-    
-    
-    local retrivePos = function(p)
-        local pos, w = table.unpack(p)
-        pos = station.segmentLength * pos
-        return pos, pos - w + 1, pos + w - 1
-    end
-    
     local buildAllStairs = function()
         return pipe.new
             + func.mapFlatten(uOffsets, function(offset)
@@ -139,9 +138,12 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             end)
     end
     
-    local buildPassStreet = function(w, type, tramTrack, length, overpasses, sideA, sideB)
+    local sidePassesLimits = function(w, length, overpasses)
         local intersections = pipe.new * func.map(overpasses, retrivePos)
-        local yOffsetsB, yOffsetsA =
+        return
+            offsetMin - 2 - w,
+            offsetMax + 2 + w,
+            (offsetMin + offsetMax) * 0.5,
             table.unpack(
                 (
                 pipe.from(-length * 0.5 + 3 * w)
@@ -160,10 +162,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 )
                 * function(yOffsets) return {yOffsets / 0, yOffsets + {-8 - w, 8 + w}} end
                 * pipe.map(pipe.sort(function(x, y) return x < y end))
-        )
-        local xposA = offsetMin - 2 - w
-        local xposB = offsetMax + 2 + w
-        local xCent = (offsetMin + offsetMax) * 0.5
+    )
+    end
+    
+    local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB)
+        local xposA, xposB, xCent, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
         
         local makeSide = function(xpos, yOffsets, fixed)
             return
@@ -306,7 +309,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     
     end
     
-    return offsetMin, offsetMax, buildAllStairs, buildPass, buildFences, buildPassStreet
+    return offsetMin, offsetMax, buildAllStairs, buildPass, buildFences, buildSidePasses, sidePassesLimits
 end
 
 local function params()
@@ -438,7 +441,7 @@ local function updateFn(config)
             local ext1 = coor.applyEdges(coor.transY(length * 0.5 + 5), coor.I())(station.generateTrackGroups(func.map(xOffsets, resetParity), 10))
             local ext2 = coor.applyEdges(coor.flipY(), coor.flipY())(ext1)
             
-            local xMin, xMax, buildAllStairs, buildPass, buildFences, buildPassStreet = makeBuilders(stairs, xOffsets, uOffsets)
+            local xMin, xMax, buildAllStairs, buildPass, buildFences, buildSidePasses, sidePassesLimits = makeBuilders(stairs, xOffsets, uOffsets)
             local yMin = -0.5 * length - 20
             local yMax = -yMin
             
@@ -450,7 +453,7 @@ local function updateFn(config)
             
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(pipe.new + normal + ext1 + ext2)}
-                + buildPassStreet(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
+                + buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
             
             local sideWalls =
                 pipe.new
@@ -460,7 +463,6 @@ local function updateFn(config)
                 * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 1, s.y, height}}, {m = s.m, v = {xMax + 1, s.y, height}}} end)
                 * pipe.map(function(s)
                     return newModel(s.m,
-                        -- coor.shearX(math.atan(0.1)),
                         coor.scaleX(2),
                         coor.scaleZ((-height + 0.8) / 10),
                         coor.trans(coor.xyz(table.unpack(s.v)))
@@ -477,23 +479,58 @@ local function updateFn(config)
             
             result.terminalGroups = station.makeTerminals(xuIndex)
             
-            -- End of generation
-            -- Slope, Height, Mirror treatment
-            -- setHeight(result, height)
-            local f = {
-                {xMin, yMax, height},
-                {xMin, yMin, height},
-                {xMax, yMin, height},
-                {xMax, yMax, height}
-            }
-            
-            
-            local basePt = {
+            local basePt = pipe.new * {
                 coor.xyz(-0.5, -0.5, 0),
                 coor.xyz(0.5, -0.5, 0),
                 coor.xyz(0.5, 0.5, 0),
                 coor.xyz(-0.5, 0.5, 0)
             }
+            
+            local fPasses = pipe.from(sidePassesLimits(streetWidth, length, overpasses))
+                * function(xposA, xposB, _, y, _)
+                    local passLength = y[#y] - y[1] + 2 * streetWidth
+                    local ignoreIf = function(c) return function(value) return c and {} or value end end
+                    
+                    return pipe.new
+                        + overpasses
+                        * pipe.map(retrivePos)
+                        * pipe.map(function(pos) return basePt
+                            * pipe.map(function(f) return (f ..
+                                coor.scaleX(xposB - xposA + 8)
+                                * coor.scaleY(2 * streetWidth)
+                                * coor.trans(coor.xyz(0.5 * (xposA + xposB), pos, 0.8))
+                                ):toTuple() end)
+                        end)
+                        * ignoreIf(sideA)
+                        
+                        + basePt
+                        * pipe.map(function(f) return (f ..
+                            coor.scaleX(2 * streetWidth)
+                            * coor.scaleY(passLength)
+                            * coor.transX(xMin - streetWidth - 2)
+                            * coor.transZ(0.8)):toTuple() end)
+                        * function(f) return sideA and {f} or {} end
+                        
+                        + overpasses
+                        * pipe.map(retrivePos)
+                        * pipe.map(function(pos) return basePt
+                            * pipe.map(function(f) return (f ..
+                                coor.scaleX(xposB - xposA + 8)
+                                * coor.scaleY(2 * streetWidth)
+                                * coor.trans(coor.xyz(0.5 * (xposA + xposB), pos, 0.8))
+                                ):toTuple() end)
+                        end)
+                        * ignoreIf(sideB)
+                        
+                        + basePt
+                        * pipe.map(function(f) return (f ..
+                            coor.scaleX(2 * streetWidth)
+                            * coor.scaleY(passLength)
+                            * coor.transX(xMax + streetWidth + 2)
+                            * coor.transZ(0.8)
+                            ):toTuple() end)
+                        * function(f) return sideB and {f} or {} end
+                end
             
             local fBase = func.map(basePt,
                 function(f) return (f .. coor.scaleX(xMax - xMin + 2) * coor.scaleY(yMax - yMin) * coor.transX((xMax + xMin) * 0.5) * coor.transZ(height)):toTuple() end)
@@ -511,19 +548,19 @@ local function updateFn(config)
             }
             
             result.terrainAlignmentLists = {
-                    -- {
-                    --     type = "EQUAL",
-                    --     faces = {fHouse}
-                    -- },
-                    -- {
-                    --     type = "LESS",
-                    --     faces = {fOutter},
-                    -- },
-                    {
-                        type = "EQUAL",
-                        faces = {fBase},
-                        slopeLow = 0,
-                    }
+                {
+                    type = "LESS",
+                    faces = {fOutter},
+                },
+                {
+                    type = "EQUAL",
+                    faces = fPasses / fHouse
+                },
+                {
+                    type = "EQUAL",
+                    faces = {fBase},
+                    slopeLow = 0,
+                }
             }
             
             result.cost = 60000 + nbTracks * 24000
