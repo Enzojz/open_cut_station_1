@@ -10,7 +10,7 @@ function data() return
               tangent = { count = 504, offset = 6048 }, 
               uv0 = { count = 504, offset = 6048 }, 
              }, 
-          materials = { "sunk_side_wall.mtl" }
+          materials = { "station/opencut/side_wall.mtl" }
          }
        }, 
     vertexAttr = 

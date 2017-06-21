@@ -475,6 +475,7 @@ local function updateFn(config)
                 + buildFences(nSeg, overpasses / {0, 1})
                 + buildPass(overpasses)
                 + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 4.75))}
+                + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
             
             result.terminalGroups = station.makeTerminals(xuIndex)
                         

@@ -50,20 +50,21 @@ local station = require "opencutstation"
 
 local config = {
     availability = {
-        yearFrom = 1920
+        yearFrom = 1980
     },
     order = 5020,
     soundConfig = {
-        soundSet = {name = "station_passenger_old"}
+        soundSet = {name = "station_passenger_new"}
     },
     platformRepeat = "station/train/passenger/opencut/1990/platform_repeat.mdl",
     platformStart = "station/train/passenger/1990/platform_double_start.mdl",
     platformEnd = "station/train/passenger/1990/platform_double_end.mdl",
     platformDwlink = "station/train/passenger/opencut/1990/platform_downstairs.mdl",
     stationHouse = "station/train/passenger/opencut/1990/main_building.mdl",
+    passEntry = "station/train/passenger/opencut/pass_entry.mdl",
     sideWall = "station/train/passenger/opencut/wall_20.mdl",
-    sideWallFst = "station/train/passenger/opencut/side_wall_fst.mdl",
-    sideWallLst = "station/train/passenger/opencut/side_wall_lst.mdl",
+    sideWallFst = "station/train/passenger/opencut/wall_fst.mdl",
+    sideWallLst = "station/train/passenger/opencut/wall_lst.mdl",
 }
 
 data = station.dataCallback(config)

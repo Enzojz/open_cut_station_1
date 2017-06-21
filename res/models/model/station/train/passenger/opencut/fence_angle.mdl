@@ -5,7 +5,7 @@ function data()
             {
                 children = {
                     {
-                        id = "station/sunk/fence_angle.msh",
+                        id = "station/opencut/fence_angle.msh",
                         transf = {
                             1, 0, 0, 0,
                             0, 1, 0, 0,

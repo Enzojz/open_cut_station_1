@@ -27,7 +27,7 @@ function data()
         type = "ASSET_TRACK",
         description = {
             name = _("Miscellaneous"),
-            description = _("Ramp Protector")
+            description = _("Concrete Retaining Wall")
         },
         availability = {
             yearFrom = 1950
@@ -41,14 +41,14 @@ function data()
         params = {
             {
                 key = "wallLength",
-                name = _("Length of Wall") .. "(m)",
+                name = _("Length") .. "(m)",
                 values = func.map(wallSegs, function(n) return tostring(n * wallLength) end),
             },
             {
                 key = "wallHeight",
-                name = _("Wall height") .. "(m)",
+                name = _("Height") .. "(m)",
                 values = func.map(func.map(wallHeight, math.floor), tostring),
-                defaultIndex = 4
+                defaultIndex = 2
             },
             {
                 key = "heightAdj",
@@ -120,11 +120,43 @@ function data()
                 end)
                 * function(w) return params.heightAdj == 0 and {} or w end
             
+            local ptA = coor.xyz(totalLength * 0.5, 0, height + (params.adjSide == 0 and adjHeight or 0)) .. mShear
+            local ptB = coor.xyz(-totalLength * 0.5, 0, height + (params.adjSide == 0 and 0 or adjHeight)) .. mShear
             
             local extWidth = 2 * height
-            local slopeExt = height / (extWidth - 6)
-            local yMin = -totalLength * 0.5
-            local yMax = totalLength + yMin
+            local slopeExt = 0.75
+            
+            local top = {
+                ptB + coor.xyz(0, -4, 0),
+                ptB + coor.xyz(0, -extWidth, 0),
+                ptA + coor.xyz(0, -extWidth, 0),
+                ptA + coor.xyz(0, -4, 0)
+            }
+            
+            
+            local extB = (ptB.z + 10)
+            local slopeB = {
+                ptB + coor.xyz(-extB, -4, -ptB.z - 10),
+                ptB + coor.xyz(-extB, -extWidth - extB, -ptB.z - 10),
+                ptB + coor.xyz(0, -extWidth, 0),
+                ptB + coor.xyz(0, -4, 0),
+            }
+            
+            local extA = (ptA.z + 10)
+            local slopeA = {
+                ptA + coor.xyz(0, -4, 0),
+                ptA + coor.xyz(0, -extWidth, 0),
+                ptA + coor.xyz(extA, -extWidth - extA, -ptA.z - 10),
+                ptA + coor.xyz(extA, -4, -ptA.z - 10),
+            }
+            
+            local slopeC = {
+                ptA + coor.xyz(0, -extWidth, 0),
+                ptA + coor.xyz(extA, -extWidth - extA, -ptA.z - 10),
+                ptB + coor.xyz(-extB, -extWidth - extB, -ptB.z - 10),
+                ptB + coor.xyz(0, -extWidth, 0)
+            }
+            
             result.terrainAlignmentLists =
                 params.aligned == 1
                 and {
@@ -136,39 +168,15 @@ function data()
                 or {
                     {
                         type = "GREATER",
-                        faces = {{
-                            {yMin, -4, height},
-                            {yMin, -extWidth, height},
-                            {yMax, -extWidth, height},
-                            {yMax, -4, height},
+                        faces = {
+                            func.map(top, coor.vec2Tuple),
+                            func.map(slopeA, coor.vec2Tuple),
+                            func.map(slopeB, coor.vec2Tuple),
+                            func.map(slopeC, coor.vec2Tuple)
                         },
-                        {
-                            {yMax, -4, height},
-                            {yMax, -extWidth, height},
-                            {yMax + extWidth - 6, -extWidth, 0},
-                            {yMax + extWidth - 6, -5, 0},
-                        },
-                        {
-                            {yMin - extWidth + 6, -5, 0},
-                            {yMin - extWidth + 6, -extWidth, 0},
-                            {yMin, -extWidth, height},
-                            {yMin, -4, height},
-                        }},
                         slopeLow = 0,
                         slopeHigh = 0,
-                    },
-                    {
-                        type = "GREATER",
-                        faces = {{
-                            {yMin, -extWidth, height},
-                            {yMin, -extWidth - 1, height},
-                            {yMax, -extWidth - 1, height},
-                            {yMax, -extWidth, height},
-                        },
-                        },
-                        slopeLow = slopeExt,
-                        slopeHigh = slopeExt,
-                    },
+                    }
                 }
             
             return result

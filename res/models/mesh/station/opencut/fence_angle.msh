@@ -14,7 +14,7 @@ function data() return
               uv0 = 
                 { count = 2160, offset = 25920 }, 
              }, 
-          materials = { "sunk_fence.mtl" }
+          materials = { "station/opencut/fence.mtl" }
          }
        }, 
     vertexAttr = 

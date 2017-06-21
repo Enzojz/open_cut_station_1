@@ -1,7 +1,7 @@
 function data()
     return {
         en = {
-            ["name"] = "Sunk station",
+            ["name"] = "Open-cut station",
             ["desc"] = [[An underground station with one/multi-level possibilty, it can be used to configure a Spanish solution or Cross Station.
 Features:
 * Visible platforms

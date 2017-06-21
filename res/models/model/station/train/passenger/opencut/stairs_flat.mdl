@@ -5,7 +5,7 @@ function data()
             {
                 children = {
                     {
-                        id = "station/sunk/stairs_flat.msh",
+                        id = "station/opencut/stairs_flat.msh",
                         transf = {
                             1, 0, 0, 0,
                             0, 1, 0, 0,
@@ -15,7 +15,7 @@ function data()
                         type = "MESH",
                     },
                     {
-                        id = "station/sunk/fence_flat.msh",
+                        id = "station/opencut/fence_flat.msh",
                         transf = {
                             1, 0, 0, 0,
                             0, 1, 0, 0,
