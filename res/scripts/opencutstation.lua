@@ -558,14 +558,14 @@ local function updateFn(config)
 end
 
 
-local elevatedstation = {
+local opencutstation = {
     dataCallback = function(config)
         return function()
             return {
                 type = "RAIL_STATION",
                 description = {
-                    name = _("Underground / Multi-level Passenger Station"),
-                    description = _("An underground / multi-level passenger station")
+                    name = _("Open-cut station"),
+                    description = _("An open-cut station with passes options.")
                 },
                 availability = config.availability,
                 order = config.order,
@@ -577,4 +577,4 @@ local elevatedstation = {
     end
 }
 
-return elevatedstation
+return opencutstation

@@ -1,9 +1,10 @@
-local descEn = [[An open-cut station with side passes and over passes.
+local descEn = [[An open-cut station with side passes and over passes, with retaining wall as track asset.
 Features:
 * From 2 to 12 tracks
 * From 40m to 480m platform lengths
 * Options to have different layout of passes and tram tracks.
 * Available from 1980
+* With retaining wall as track asset.
 
 To be implemented:
 * Entry from side passes.
@@ -76,7 +77,14 @@ function data()
             ["Overpasses"] = "Passages-pont",
             ["None"] = "Aucun",
             ["Side Passes"] = "Passages en parallèle",
-            ["Street Type"] = "Type de passage"
+            ["Street Type"] = "Type de passage",
+            ["Height Adjustment"] = "Ajustement d'hauteur",
+            ["Left"] = "Gauche",
+            ["Right"] = "Droite",
+            ["Slope"] = "Pente",
+            ["Modify terrain"] = "Modification de terrain",
+            ["Concrete Retaining Wall"] = "Mur de soutènement en béton"
+
         },
         zh_CN = {
             ["name"] = "地堑结构车站",
@@ -88,7 +96,13 @@ function data()
             ["Overpasses"] = "过站街道",
             ["None"] = "无",
             ["Side Passes"] = "平行街道",
-            ["Street Type"] = "街道类型"
+            ["Street Type"] = "街道类型",
+            ["Height Adjustment"] = "高度调整",
+            ["Left"] = "左",
+            ["Right"] = "右",
+            ["Slope"] = "坡度",
+            ["Modify terrain"] = "修改地形",
+            ["Concrete Retaining Wall"] = "护土墙"
         },
     }
 end

@@ -26,7 +26,7 @@ function data()
     return {
         type = "ASSET_TRACK",
         description = {
-            name = _("Miscellaneous"),
+            name = _("Concrete Retaining Wall"),
             description = _("Concrete Retaining Wall")
         },
         availability = {
