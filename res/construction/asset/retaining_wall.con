@@ -5,7 +5,7 @@ local station = require("opencut/stationlib")
 
 local wallSegs = {1, 2, 3, 4, 5}
 local wallLength = 10
-local wallHeight = {0, 5, 8, 10, 12, 15, 17.5, 20}
+local wallHeight = {1, 5, 8, 10, 12, 16, 18, 20}
 local heightAdj = {0, 0.5, 1, 2, 2.5, 3, 4, 5}
 local rTxtList = {"●", "●", "•", "∙", "0", "∙", "•", "●", "●"}
 
@@ -47,7 +47,7 @@ function data()
             {
                 key = "wallHeight",
                 name = _("Height") .. "(m)",
-                values = func.map(func.map(wallHeight, math.floor), tostring),
+                values = func.map(wallHeight, tostring),
                 defaultIndex = 2
             },
             {
@@ -176,9 +176,13 @@ function data()
                         },
                         slopeLow = 0,
                         slopeHigh = 0,
+                    },
+                    {
+                        type = "EQUAL",
+                        faces = {}
                     }
                 }
-            
+
             return result
         end
     }

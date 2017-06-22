@@ -52,13 +52,13 @@ local config = {
     availability = {
         yearFrom = 1980
     },
-    order = 5020,
+    order = 5023,
     soundConfig = {
         soundSet = {name = "station_passenger_new"}
     },
     platformRepeat = "station/train/passenger/opencut/1990/platform_repeat.mdl",
-    platformStart = "station/train/passenger/1990/platform_double_start.mdl",
-    platformEnd = "station/train/passenger/1990/platform_double_end.mdl",
+    platformStart = "station/train/passenger/opencut/1990/platform_start.mdl",
+    platformEnd = "station/train/passenger/opencut/1990/platform_end.mdl",
     platformDwlink = "station/train/passenger/opencut/1990/platform_downstairs.mdl",
     stationHouse = "station/train/passenger/opencut/1990/main_building.mdl",
     passEntry = "station/train/passenger/opencut/pass_entry.mdl",

@@ -15,7 +15,7 @@ function data()
                     tfnetId = 27218,
                 },
             },
-            tags = {"Train Station", "Underground Station", "Passenger Station", "Station"},
+            tags = {"Train Station", "Underground Station", "Passenger Station", "Station", "Open-cut station"},
         },
     }
 end

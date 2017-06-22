@@ -1,4 +1,4 @@
-local descEn = [[An open-cut station with side passes and over passes, with retaining wall as track asset.
+local descEn = [[An open-cut station with retaining wall as track asset.
 Features:
 * From 2 to 12 tracks
 * From 40m to 480m platform lengths
@@ -6,42 +6,34 @@ Features:
 * Available from 1980
 * With retaining wall as track asset.
 
-To be implemented:
-* Entry from side passes.
-
 Known Issue
 * Terrain calculate error when the station is rebuilt. (It's a game bug)
 
-=== WARNING ===
-This version 0.9 is pre-release beta, available for testing, preview and collection feedback.
-Please take attention to use it with your important game saves.
-=== WARNING ===
+---------------
+Changelog
+1.0
+First release
+0.9
+Pre-release beta
+]]
+
+local descFr = [[Une gare dans la trachée ouverte avec outil de construction pour mur de soutènement
+Caractéristiques :
+* Longueur de plateformes de 40m jusqu'à 480m
+* De 2 jusqu'à 12 voies
+* Options pour plusieurs configurations des passages et voie de tram.
+* Disponible depuis 1980
+* Contient un outil de construction pour mur de soutènement
+
+Problème connu
+* Erreur de calculs de terrain lors la reconstruction de la gare.(It s'agit un bug de jeux.)
 
 ---------------
 Changelog
+1.0
+Première version
 0.9
-Pre-release beta
---------------- 
-* Planned projects 
-- Curved station 
-]]
-
-local descFr = [[Une gare dans la traché ouvert, avec passages-pont et passages en parallèle.
-Caractéristiques:
-* Longueur de platformes de 40m jusqu'à 480m
-* De 2 jusqu'à 12 voies
-* Options pour plusieurs configuration des passages et voie de tram.
-* Disponible depuis 1980
-
-À implémenter
-* Entrée depuis la passage-pont
-
-Problème connu
-* Erreur de calculs de trarrain lors la reconstuction de la gare.(It s'agit un bug de jeux.)
-
-=== ATTENTION ===
-C'est la verison 0.9 pour teste et collection des opinions, donc pontentielment il consiste de bug.
-Veuillez être prudent lors utilisation avec votre sauvegarde important! 
+Version beta
 ]]
 
 local descZh = [[一种设置在地堑结构中的车站，可以同时设置平行或者交错的街道。
@@ -49,16 +41,18 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
 * 站台长度从40米到480米
 * 二至十二条股道
 * 多种街道和有轨电车选项
-* 1990年起可用
-
- 将实现内容
- * 过站街道的车站入口
+* 1980 年起可用
+* 带有护土墙建造工具
 
  已知问题
  * 重建车站时地面高度计算错误（游戏BUG）
-
- === 注意 ===
- 该版本为0.9测试版本，请谨慎使用！
+ 
+---------------
+Changelog
+1.0
+正式发布
+0.9
+Beta测试版
 ]]
 
 function data()
@@ -68,27 +62,29 @@ function data()
             ["desc"] = descEn
         },
         fr = {
-            ["name"] = "Gare dans tranché ouvert",
+            ["name"] = "Gare dans la trachée ouverte",
             ["desc"] = descFr,
+            ["An open-cut station with passes options."] = "Une gare dans la tranchée ouverte avec options de route de passages.",
             ["Number of tracks"] = "Nombre de voies",
             ["Track Layout"] = "Disposition de voie",
-            ["Platform length"] = "Longeur de plateforms",
+            ["Platform length"] = "Longeur de plateformes",
             ["Depth"] = "Profondeur",
-            ["Overpasses"] = "Passages-pont",
+            ["Overpasses"] = "Pont-routes",
             ["None"] = "Aucun",
-            ["Side Passes"] = "Passages en parallèle",
+            ["Side Passes"] = "Routes en parallèle",
             ["Street Type"] = "Type de passage",
             ["Height Adjustment"] = "Ajustement d'hauteur",
             ["Left"] = "Gauche",
             ["Right"] = "Droite",
             ["Slope"] = "Pente",
             ["Modify terrain"] = "Modification de terrain",
-            ["Concrete Retaining Wall"] = "Mur de soutènement en béton"
-
+            ["Concrete Retaining Wall"] = "Mur de soutènement en béton",
+            ["Entry on overpasses"] = "Entrée sur pont-route"
         },
         zh_CN = {
             ["name"] = "地堑结构车站",
             ["desc"] = descZh,
+            ["An open-cut station with passes options."] = "一座设置在地堑结构中的车站，可以同时设置平行或者交错的街道。",
             ["Number of tracks"] = "轨道数量",
             ["Track Layout"] = "轨道布局",
             ["Platform length"] = "站台长度",
@@ -102,7 +98,8 @@ function data()
             ["Right"] = "右",
             ["Slope"] = "坡度",
             ["Modify terrain"] = "修改地形",
-            ["Concrete Retaining Wall"] = "护土墙"
+            ["Concrete Retaining Wall"] = "护土墙",
+            ["Entry on overpasses"] = "街道进站口"
         },
     }
 end

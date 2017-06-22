@@ -5,6 +5,7 @@ local pipe = require "opencut/pipe"
 local coor = require "opencut/coor"
 local trackEdge = require "opencut/trackedge"
 local station = require "opencut/stationlib"
+local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
@@ -102,7 +103,6 @@ local ignoreIf = function(sw) return function(value) return sw and {} or value e
 
 local retrivePos = function(p)
     local pos, w = table.unpack(p)
-    pos = station.segmentLength * pos
     return pos, pos - w + 1, pos + w - 1
 end
 
@@ -153,14 +153,14 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 * function(p) return
                     intersections
                     * pipe.filter(function(p) return p < 0 end)
-                    * function(ls) return #ls == 0 and {p} or (ls[1] > p + 1.5 * w and ls / p or ls) end
+                    * function(ls) return #ls == 0 and {p} or (ls[1] > p + 2 * w and ls / p or ls) end
                 end
                 +
                 pipe.from(length * 0.5 - 3 * w)
                 * function(p) return
                     intersections
                     * pipe.filter(function(p) return p > 0 end)
-                    * function(ls) return #ls == 0 and {p} or (ls[1] < p - 1.5 * w and ls / p or ls) end
+                    * function(ls) return #ls == 0 and {p} or (ls[1] < p - 2 * w and ls / p or ls) end
                 end
                 )
                 * function(yOffsets) return {yOffsets / 0, yOffsets + {-8 - w, 8 + w}} end
@@ -247,7 +247,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         }
     end
     
-    local buildPass = function(pos)
+    local buildPass = function(pos, hasEntry, config)
         return func.mapFlatten(pos, function(p)
             local pos, f, t = retrivePos(p)
             return pipe.new
@@ -261,9 +261,24 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                             }
                         end)
                 end)
-                -- + buildSideStairs(pos > 0 and t + 0.5 or f - 0.5, pos > 0 and coor.I() or coor.rotZ(math.pi))
-                + func.mapFlatten(offsets, function(offset) return
+                + buildSideStairs(pos > 0 and t + 0.5 or f - 0.5, pos > 0 and coor.I() or coor.rotZ(math.pi))
+                * function(ls) return hasEntry and ls or {} end
+                + func.mapFlatten(xOffsets, function(offset) return
                     {
+                        newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, f - 0.5, zOffset))),
+                        newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, t + 0.5, zOffset))),
+                    }
+                end)
+                + func.mapFlatten(uOffsets, function(offset) return
+                    hasEntry
+                    and {
+                        newModel(config.passEntry, pos > 0 and coor.I() or coor.rotZ(math.pi),
+                            coor.trans(coor.xyz(offset.x, pos > 0 and t - 2.75 or f + 2.75, 0))),
+                        pos > 0
+                        and newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, f - 0.5, zOffset)))
+                        or newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, t + 0.5, zOffset)))
+                    }
+                    or {
                         newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, f - 0.5, zOffset))),
                         newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, t + 0.5, zOffset))),
                     }
@@ -288,7 +303,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             * func.mapFlatten(gaps,
                 function(p)
                     local _, f, t = retrivePos(p)
-                    return func.seq(f - 1, t + 1)
+                    return func.seq(math.floor(f - 1), math.ceil(t + 1))
                 end)
         
         return pipe.new
@@ -354,35 +369,44 @@ local function params()
             values = {_("None"), _("A"), _("B"), _("A + B")},
             defaultIndex = 0
         },
-        paramsutil.makeTramTrackParam1(),
-        paramsutil.makeTramTrackParam2(),
         {
             key = "streetType",
             name = _("Street Type"),
             values = {_("S"), _("M"), _("L")},
             defaultIndex = 0
         },
+        paramsutil.makeTramTrackParam1(),
+        paramsutil.makeTramTrackParam2(),
+        {
+            key = "overpassEntry",
+            name = _("Entry on overpasses"),
+            values = {_("No"), _("Yes")},
+            defaultIndex = 1
+        },
     }
 end
 
 local function defaultParams(params)
-    params.trackType = params.trackType or 0
-    params.catenary = params.catenary or 1
-    params.length = params.length or 2
     params.nbTracks = params.nbTracks or 0
-    params.platformHeight = params.platformHeight or 1
-    params.tramTrack = params.tramTrack or 0
+    params.length = params.length or 2
+    params.trackType = params.trackType or 0
     params.trackLayout = params.trackLayout or 0
+    params.catenary = params.catenary or 1
+    params.platformHeight = params.platformHeight or 1
+    params.overpass = params.overpass or 0
+    params.sidepass = params.sidepass or 0
+    params.streetType = params.streetType or 0
+    params.tramTrack = params.tramTrack or 0
+    params.overpassEntry = params.length < 2 and 0 or (params.overpassEntry or 1)
 end
 
 local function updateFn(config)
     local platformPatterns = function(n)
-        local platforms = func.seqMap({1, n}, function(_) return config.platformRepeat end)
-        platforms[0.5 * n] = config.platformDwlink
-        platforms[0.5 * n + 1] = config.platformDwlink
-        platforms[1] = config.platformStart
-        platforms[n] = config.platformEnd
-        return platforms
+        return pipe.new
+            * func.seq(1, n * 0.5)
+            * pipe.map(function(x) return x % 2 == 0 and config.platformRepeat or config.platformDwlink end)
+            * function(ls) return ls * pipe.rev() + ls end
+            * function(ls) return ls * pipe.with({[1] = config.platformStart, [n] = config.platformEnd}) end
     end
     
     local stationHouse = config.stationHouse
@@ -400,6 +424,8 @@ local function updateFn(config)
     
     return
         function(params)
+            defaultParams(params)
+            
             local result = {}
             
             local trackType = ({"standard.lua", "high_speed.lua"})[params.trackType + 1]
@@ -413,6 +439,7 @@ local function updateFn(config)
             
             local platforms = platformPatterns(nSeg)
             local stairs = stairsConfig[params.platformHeight + 1]
+            local overpassEntry = params.overpassEntry == 1
             
             local levels =
                 {
@@ -448,9 +475,18 @@ local function updateFn(config)
             local yMin = -0.5 * length - 20
             local yMax = -yMin
             
+            local x = function()
+                if (not overpassEntry) then
+                    return (nSeg / 4 + 0.5) * station.segmentLength
+                else
+                    local pos = (nSeg * 0.5) % 2 and (nSeg * 0.5) or (nSeg * 0.5 - 1)
+                    return (pos - 1) * station.segmentLength - 1.5 - streetWidth
+                end
+            end
+            
             local overpasses = pipe.new
-                + (func.contains({1, 3}, params.overpass) and {{-nSeg / 4 - 0.5, streetWidth}} or {})
-                + (func.contains({2, 3}, params.overpass) and {{nSeg / 4 + 0.5, streetWidth}} or {})
+                + (func.contains({1, 3}, params.overpass) and {{-x(), streetWidth}} or {})
+                + (func.contains({2, 3}, params.overpass) and {{x(), streetWidth}} or {})
             
             local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
             
@@ -476,7 +512,7 @@ local function updateFn(config)
                 + sideWalls
                 + buildAllStairs()
                 + buildFences(nSeg, overpasses / {0, 1})
-                + buildPass(overpasses)
+                + buildPass(overpasses, overpassEntry, config)
                 + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 4.75))}
                 + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
             
