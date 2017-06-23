@@ -599,7 +599,7 @@ local opencutstation = {
             return {
                 type = "RAIL_STATION",
                 description = {
-                    name = _("Open-cut station"),
+                    name = _("name"),
                     description = _("An open-cut station with passes options.")
                 },
                 availability = config.availability,
