@@ -1,10 +1,10 @@
 function data()
     return {
         info = {
-            minorVersion = 0,
+            minorVersion = 1,
             severityAdd = "NONE",
             severityRemove = "CRITICAL",
-            name = _("name"),
+            name = _("mod"),
             description = _("desc"),
             authors = {
                 {
@@ -15,7 +15,7 @@ function data()
                     tfnetId = 27218,
                 },
             },
-            tags = {"Train Station", "Underground Station", "Passenger Station", "Station", "Open-cut station"},
+            tags = {"Train Station", "Underground Station", "Passenger Station", "Station", "Open-cut station", "Track Asset", "Asset"},
         },
     }
 end

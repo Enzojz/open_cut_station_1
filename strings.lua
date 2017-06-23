@@ -11,6 +11,8 @@ Known Issue
 
 ---------------
 Changelog
+1.1
+Fixed crash problem of connection to large road entry
 1.0
 First release
 0.9
@@ -30,6 +32,8 @@ Problème connu
 
 ---------------
 Changelog
+1.1
+Correction de plantage lors la connexion ver entrée du route large.
 1.0
 Première version
 0.9
@@ -49,6 +53,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.1
+修正了连接至宽马路入口时的游戏崩溃问题
 1.0
 正式发布
 0.9
@@ -58,10 +64,12 @@ Beta测试版
 function data()
     return {
         en = {
+            ["mod"] = "Open-cut Station & Retaining Wall",
             ["name"] = "Open-cut station",
             ["desc"] = descEn
         },
         fr = {
+            ["mod"] = "Gare dans la trachée ouverte & mur de soutènement",
             ["name"] = "Gare dans la trachée ouverte",
             ["desc"] = descFr,
             ["An open-cut station with passes options."] = "Une gare dans la tranchée ouverte avec options de route de passages.",
@@ -82,6 +90,7 @@ function data()
             ["Entry on overpasses"] = "Entrée sur pont-route"
         },
         zh_CN = {
+            ["mod"] = "地堑结构车站和护土墙",
             ["name"] = "地堑结构车站",
             ["desc"] = descZh,
             ["An open-cut station with passes options."] = "一座设置在地堑结构中的车站，可以同时设置平行或者交错的街道。",

@@ -5,7 +5,6 @@ local pipe = require "opencut/pipe"
 local coor = require "opencut/coor"
 local trackEdge = require "opencut/trackedge"
 local station = require "opencut/stationlib"
-local dump = require "datadumper"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
@@ -192,7 +191,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 {
                     {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
                     {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
-                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-5 - w, 0, 0)), snap = {false, true}, align = true}
+                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true}
                 })
             + func.mapFlatten(overpasses,
                 function(overpass)
