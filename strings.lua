@@ -11,6 +11,8 @@ Known Issue
 
 ---------------
 Changelog
+1.2
+Added second connection to the station
 1.1
 Fixed crash problem of connection to large road entry
 1.0
@@ -55,6 +57,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.2
+增加了第二入口的道路连接
 1.1
 修正了连接至宽马路入口时的游戏崩溃问题
 1.0
