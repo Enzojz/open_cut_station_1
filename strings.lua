@@ -32,6 +32,8 @@ Problème connu
 
 ---------------
 Changelog
+1.2
+Ajoute de connexion routière secondaire.
 1.1
 Correction de plantage lors la connexion ver entrée du route large.
 1.0
