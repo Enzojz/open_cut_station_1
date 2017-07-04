@@ -1,6 +1,5 @@
 local func = require "opencut/func"
-trackEdge = {}
-
+local trackEdge = {}
 
 function trackEdge.normal(c, t, aligned, snapNodeRule)
     return function(edges)

@@ -1,4 +1,3 @@
-local laneutil = require "laneutil"
 local paramsutil = require "paramsutil"
 local func = require "opencut/func"
 local pipe = require "opencut/pipe"
@@ -162,13 +161,13 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     * function(ls) return #ls == 0 and {p} or (ls[1] < p - 2 * w and ls / p or ls) end
                 end
                 )
-                * function(yOffsets) return {yOffsets / 0, yOffsets + {-8 - w, 8 + w}} end
+                * function(yOffsets) return {yOffsets + {2 + w, -2 - w, 0}, yOffsets + {-8 - w, 8 + w}} end
                 * pipe.map(pipe.sort(function(x, y) return x < y end))
     )
     end
     
     local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB)
-        local xposA, xposB, xCent, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
+        local xposA, xposB, _, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
         
         local makeSide = function(xpos, yOffsets, fixed)
             return
@@ -187,6 +186,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideA)
             + makeSide(xposB, func.filter(yOffsetsB, function(y) return y <= 0 end), coor.xyz(xposB + 2 * w, -length * 0.5, 0.16)) * ignoreIf(not sideB)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideB)
+            + ignoreIf(not sideB or length < 160)(
+                {
+                    {edge = station.toEdge(coor.xyz(xposB, w + 2, 0.8), coor.xyz(2 * w, 0, -0.8)), snap = {false, true}, align = true}
+                }
+            )
             + ignoreIf(not sideA)(
                 {
                     {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
@@ -381,22 +385,17 @@ local function params()
             name = _("Entry on overpasses"),
             values = {_("No"), _("Yes")},
             defaultIndex = 1
-        },
+        }
     }
 end
 
-local function defaultParams(params)
-    params.nbTracks = params.nbTracks or 0
-    params.length = params.length or 2
-    params.trackType = params.trackType or 0
-    params.trackLayout = params.trackLayout or 0
-    params.catenary = params.catenary or 1
-    params.platformHeight = params.platformHeight or 1
-    params.overpass = params.overpass or 0
-    params.sidepass = params.sidepass or 0
-    params.streetType = params.streetType or 0
-    params.tramTrack = params.tramTrack or 0
-    params.overpassEntry = params.length < 2 and 0 or (params.overpassEntry or 1)
+local function defaultParams(param)
+    local function limiter(d, u)
+        return function(v) return v and v < u and v or d end
+    end
+    
+    func.forEach(params(), function(i)param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
+    param.overpassEntry = param.length < 2 and 0 or param.overpassEntry
 end
 
 local function updateFn(config)
@@ -436,7 +435,6 @@ local function updateFn(config)
             local tramTrack = tramType[params.tramTrack + 1]
             local streetWidth, streetType = table.unpack(streetProfile[params.streetType + 1])
             
-            local platforms = platformPatterns(nSeg)
             local stairs = stairsConfig[params.platformHeight + 1]
             local overpassEntry = params.overpassEntry == 1
             
