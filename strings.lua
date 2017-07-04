@@ -12,7 +12,7 @@ Known Issue
 ---------------
 Changelog
 1.2
-Added second connection to the station
+Added second road connection to the station
 1.1
 Fixed crash problem of connection to large road entry
 1.0
