@@ -9,6 +9,8 @@ Features:
 
 ---------------
 Changelog
+1.5
+Added "distance to track" option to retaining wall
 1.4
 Fix of no electric tram track bug
 Fix of wrong platform waiting line position
@@ -36,6 +38,8 @@ Caractéristiques :
 
 ---------------
 Changelog
+1.5
+Ajout d'option de distance vers la voie pour mur de soutènement
 1.4
 Correction de disparution de voie de tram electrique
 Correction de fausse position de ligne d'attendre du quai
@@ -63,6 +67,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.5
+增加了护土墙至轨道距离选项
 1.4
 修正了消失的有轨电车轨道
 修正了错误的站台等待线位置
@@ -106,7 +112,8 @@ function data()
             ["Modify terrain"] = "Modification de terrain",
             ["Concrete Retaining Wall"] = "Mur de soutènement en béton",
             ["Entry on overpasses"] = "Entrée sur pont-route",
-            ["Bus/Tram Stop"] = "Arrêt de bus/tram"
+            ["Bus/Tram Stop"] = "Arrêt de bus/tram",
+            ["Distance to track"] = "Distance vers la voie"
         },
         zh_CN = {
             ["mod"] = "地堑结构车站和护土墙",
@@ -128,7 +135,8 @@ function data()
             ["Modify terrain"] = "修改地形",
             ["Concrete Retaining Wall"] = "护土墙",
             ["Entry on overpasses"] = "街道进站口",
-            ["Bus/Tram Stop"] = "公交车站"
+            ["Bus/Tram Stop"] = "公交车站",
+            ["Distance to track"] = "距离轨道"
         },
     }
 end
