@@ -1,7 +1,6 @@
 local func = require "opencut/func"
 local pipe = require "opencut/pipe"
 local coor = require "opencut/coor"
-local trackEdge = require "opencut/trackedge"
 
 local newModel = function(m, ...)
     return {

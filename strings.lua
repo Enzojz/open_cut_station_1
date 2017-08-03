@@ -4,13 +4,15 @@ Features:
 * From 40m to 480m platform lengths
 * Options to have different layout of passes and tram tracks.
 * Available from 1980
+* Bus/Tram stop included
 * With retaining wall as track asset.
-
-Known Issue
-* Terrain calculate error when the station is rebuilt. (It's a game bug)
 
 ---------------
 Changelog
+1.4
+Fix of no electric tram track bug
+Fix of wrong platform waiting line position
+Bus/Tram stop option
 1.3
 Fix of crash with Build 13446
 1.2
@@ -29,13 +31,15 @@ Caractéristiques :
 * De 2 jusqu'à 12 voies
 * Options pour plusieurs configurations des passages et voie de tram.
 * Disponible depuis 1980
+* Arrêt de bus/tram intergré
 * Contient un outil de construction pour mur de soutènement
-
-Problème connu
-* Erreur de calculs de terrain lors la reconstruction de la gare.(It s'agit un bug de jeux.)
 
 ---------------
 Changelog
+1.4
+Correction de disparution de voie de tram electrique
+Correction de fausse position de ligne d'attendre du quai
+Option d'arrêt de bus/tram
 1.3
 Correction de plantage sur la version 13446
 1.2
@@ -54,19 +58,21 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
 * 二至十二条股道
 * 多种街道和有轨电车选项
 * 1980 年起可用
+* 公交车站选项
 * 带有护土墙建造工具
-
- 已知问题
- * 重建车站时地面高度计算错误（游戏BUG）
  
 ---------------
 Changelog
+1.4
+修正了消失的有轨电车轨道
+修正了错误的站台等待线位置
+增加了公交车站选项
 1.3
 修正了13446版本后的崩溃问题
 1.2
 增加了第二入口的道路连接
 1.1
-修正了连接至宽马路入口时的游戏崩溃问题
+修正了连接至宽马路入口时的崩溃问题
 1.0
 正式发布
 0.9
@@ -99,7 +105,8 @@ function data()
             ["Slope"] = "Pente",
             ["Modify terrain"] = "Modification de terrain",
             ["Concrete Retaining Wall"] = "Mur de soutènement en béton",
-            ["Entry on overpasses"] = "Entrée sur pont-route"
+            ["Entry on overpasses"] = "Entrée sur pont-route",
+            ["Bus/Tram Stop"] = "Arrêt de bus/tram"
         },
         zh_CN = {
             ["mod"] = "地堑结构车站和护土墙",
@@ -120,7 +127,8 @@ function data()
             ["Slope"] = "坡度",
             ["Modify terrain"] = "修改地形",
             ["Concrete Retaining Wall"] = "护土墙",
-            ["Entry on overpasses"] = "街道进站口"
+            ["Entry on overpasses"] = "街道进站口",
+            ["Bus/Tram Stop"] = "公交车站"
         },
     }
 end

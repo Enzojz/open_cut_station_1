@@ -1,7 +1,6 @@
 local coor = require("opencut/coor")
 local func = require("opencut/func")
 local pipe = require("opencut/pipe")
-local station = require("opencut/stationlib")
 
 local wallSegs = {1, 2, 3, 4, 5}
 local wallLength = 10
@@ -124,7 +123,6 @@ function data()
             local ptB = coor.xyz(-totalLength * 0.5, 0, height + (params.adjSide == 0 and 0 or adjHeight)) .. mShear
             
             local extWidth = 2 * height
-            local slopeExt = 0.75
             
             local top = {
                 ptB + coor.xyz(0, -4, 0),

@@ -177,7 +177,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
                 end
                 + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
-                    function(f, t) return {edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)), snap = {false, false}, align = false} end)
+                    function(f, t) return {
+                        edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)),
+                        snap = {false, false}, align = false,
+                        stopMarker = (t - f > 0 and t - f < w + 3) and {0.1, 0.1} or false
+                    } end)
         end
         
         
@@ -193,8 +197,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             )
             + ignoreIf(not sideA)(
                 {
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, stopMarker = {nil, 0.7}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, stopMarker = {nil, 0.7}},
                     {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true}
                 })
             + func.mapFlatten(overpasses,
@@ -218,6 +222,11 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         
         local alignedEdges = edges * pipe.filter(function(e) return e.align end)
         local nonAlignedEdges = edges * pipe.filter(function(e) return not e.align end)
+        
+        local stopList = (nonAlignedEdges + alignedEdges)
+            * pipe.map(function(e) return e.stopMarker or false end)
+            * function(m) return m * pipe.zip(func.seq(0, #m - 1), {"m", "i"}) end
+            * pipe.filter(pipe.select("m"))
         
         local streetProto = function(aligned)
             return {
@@ -247,7 +256,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 ),
                 snapNodes = sideA and {} or {1}
             }
-        }
+        }, stopList
     end
     
     local buildPass = function(pos, hasEntry, config)
@@ -385,6 +394,12 @@ local function params()
             name = _("Entry on overpasses"),
             values = {_("No"), _("Yes")},
             defaultIndex = 1
+        },
+        {
+            key = "busStop",
+            name = _("Bus/Tram Stop"),
+            values = {_("No"), _("Yes")},
+            defaultIndex = 1
         }
     }
 end
@@ -396,7 +411,7 @@ local function defaultParams(param)
     
     func.forEach(
         func.filter(params(), function(p) return p.key ~= "tramTrack" end),
-        function(i) param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
+        function(i)param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
     
     param.overpassEntry = param.length < 2 and 0 or param.overpassEntry
 end
@@ -490,9 +505,11 @@ local function updateFn(config)
             
             local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
             
+            local sideEdges, stops = buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
+            local railEdges = pipe.new + normal + ext1 + ext2
             result.edgeLists = pipe.new
-                + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(pipe.new + normal + ext1 + ext2)}
-                + buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
+                + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
+                + sideEdges
             
             local sideWalls =
                 pipe.new
@@ -585,9 +602,28 @@ local function updateFn(config)
                 }
             }
             
+            if (params.busStop == 1) then
+                result.edgeObjects =
+                    func.mapFlatten(stops, function(m)
+                        return func.filter({
+                            {
+                                edge = m.i + #railEdges * 0.5,
+                                param = m.m[1],
+                                left = false,
+                                model = "station/bus/small_new.mdl" -- see res/models/model/
+                            },
+                            {
+                                edge = m.i + #railEdges * 0.5,
+                                param = m.m[2],
+                                left = true,
+                                model = "station/bus/small_new.mdl" -- see res/models/model/
+                            }
+                        }, pipe.select("param"))
+                    end)
+            end
+            
             result.cost = 60000 + nbTracks * 24000
             result.maintenanceCost = result.cost / 6
-            
             return result
         end
 end
