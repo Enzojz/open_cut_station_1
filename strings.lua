@@ -11,6 +11,8 @@ Known Issue
 
 ---------------
 Changelog
+1.3
+Fix of crash with Build 13446
 1.2
 Added second road connection to the station
 1.1
@@ -34,6 +36,8 @@ Problème connu
 
 ---------------
 Changelog
+1.3
+Correction de plantage sur la version 13446
 1.2
 Ajoute de connexion routière secondaire.
 1.1
@@ -57,6 +61,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.3
+修正了13446版本后的崩溃问题
 1.2
 增加了第二入口的道路连接
 1.1

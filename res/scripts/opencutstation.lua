@@ -394,7 +394,10 @@ local function defaultParams(param)
         return function(v) return v and v < u and v or d end
     end
     
-    func.forEach(params(), function(i)param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
+    func.forEach(
+        func.filter(params(), function(p) return p.key ~= "tramTrack" end),
+        function(i) param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
+    
     param.overpassEntry = param.length < 2 and 0 or param.overpassEntry
 end
 
@@ -578,7 +581,7 @@ local function updateFn(config)
                 {
                     type = "EQUAL",
                     faces = {fBase},
-                    slopeLow = 0,
+                    slopeLow = 1e5,
                 }
             }
             

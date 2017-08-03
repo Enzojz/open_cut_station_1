@@ -174,8 +174,8 @@ function data()
                             func.map(slopeB, coor.vec2Tuple),
                             func.map(slopeC, coor.vec2Tuple)
                         },
-                        slopeLow = 0,
-                        slopeHigh = 0,
+                        slopeLow = 1e5,
+                        slopeHigh = 1e5,
                     },
                     {
                         type = "EQUAL",

@@ -29,23 +29,21 @@ local pipe = {}
 
 function pipe.fold(init, fun)
     return function(ls)
-        for _, e in ipairs(ls) do
-            init = fun(init, e)
-        end
+        for i = 1, #ls do init = fun(init, ls[i]) end
         return init
     end
 end
 
 function pipe.forEach(fun)
     return function(ls)
-        for i, e in ipairs(ls) do fun(e) end
+        for i = 1, #ls do fun(ls[i]) end
     end
 end
 
 function pipe.map(fun)
     return function(ls)
         local result = {}
-        for i, e in ipairs(ls) do result[i] = fun(e) end
+        for i = 1, #ls do result[i] = fun(ls[i]) end
         return result
     end
 end
@@ -62,8 +60,8 @@ end
 function pipe.mapPair(fun)
     return function(ls)
         local result = {}
-        for i, e in ipairs(ls) do
-            local k, v = fun(e)
+        for i = 1, #ls do
+            local k, v = fun(ls[i])
             result[k] = v
         end
         return result
@@ -73,8 +71,10 @@ end
 function pipe.filter(pre)
     return function(ls)
         local result = {}
-        for _, e in ipairs(ls) do
-            if pre(e) then result[#result + 1] = e end
+        for i = 1, #ls do
+            if (pre(ls[i])) then
+                result[#result + 1] = ls[i]
+            end
         end
         return result
     end
@@ -82,23 +82,17 @@ end
 
 function pipe.concat(t2)
     return function(t1)
-        local res = {}
-        for _, v in ipairs(t1) do
-            table.insert(res, v)
-        end
-        for _, v in ipairs(t2) do
-            table.insert(res, v)
-        end
-        return res
+        local result = {}
+        for i = 1, #t1 do result[#result + 1] = t1[i] end
+        for i = 1, #t2 do result[#result + 1] = t2[i] end
+        return result
     end
 end
 
 function pipe.flatten()
     return function(ls)
         local result = {}
-        for _, v in ipairs(ls) do
-            result = pipe.concat(v)(result)
-        end
+        for i = 1, #ls do result = pipe.concat(ls[i])(result) end
         return result
     end
 end
@@ -112,7 +106,7 @@ end
 function pipe.map2(ls2, fun)
     return function(ls1)
         local result = {}
-        for i, e in ipairs(ls1) do result[i] = fun(e, ls2[i]) end
+        for i = 1, #ls1 do result[i] = fun(ls1[i], ls2[i]) end
         return result
     end
 end
@@ -121,16 +115,14 @@ end
 function pipe.range(from, to)
     return function(ls)
         local result = {}
-        for i = from, to do table.insert(result, ls[i]) end
+        for i = from, to do result[#result + 1] = ls[i] end
         return result
     end
 end
 
 function pipe.contains(e)
     return function(ls)
-        for _, x in ipairs(ls) do
-            if (x == e) then return true end
-        end
+        for i = 1, #ls do if (ls[i] == e) then return true end end
         return false
     end
 end
@@ -174,19 +166,38 @@ function pipe.rev()
     end
 end
 
+function pipe.plus(n)
+    return function(e)
+        return e + n
+    end
+end
+
+function pipe.neg()
+    return function(e)
+        return -e
+    end
+end
+
+function pipe.zip(ls2, name)
+    name = name or {1, 2}
+    return function(ls1)
+        local result = {}
+        for i = 1, #ls1 do result[i] = {[name[1]] = ls1[i], [name[2]] = ls2[i]} end
+        return result
+    end
+end
+
 function pipe.select(name)
     return function(el)
         return el[name]
     end
 end
 
-function pipe.exec(...)
-    local params = {...}
-    return function(fn)
-        return fn(table.unpack(params))
+function pipe.noop()
+    return function(x)
+        return x
     end
 end
-
 
 local pipeMeta = {
     __mul = function(lhs, rhs)
@@ -237,9 +248,22 @@ pipe.from = function(...)
                 local result = rhs(table.unpack(lhs))
                 setmetatable(result, pipeMeta)
                 return result
-            end
+            end,
+            __add = function(lhs, rhs)
+                local result = pipe.concat(rhs)(lhs)
+                setmetatable(result, pipeMeta)
+                return result
+            end,
         })
     return retVal
 end
 
+pipe.exec = {}
+setmetatable(pipe.exec,
+    {
+        __mul = function(_, rhs)
+            return rhs()
+        end
+    }
+)
 return pipe
