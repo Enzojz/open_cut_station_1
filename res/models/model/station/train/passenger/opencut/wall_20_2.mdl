@@ -14,15 +14,25 @@ function data()
             {
                 children = {
                     {
-                        id = "station/opencut/oc_wall_prism.msh",
+                        id = "station/opencut/oc_wall_cube.msh",
                         transf = {
-                            2, 0, 0, 0,
+                            0.5, 0, 0, 0,
                             0,10, 0, 0,
                             0, 0,10, 0,
-                            0, 0, 0, 1
+                            0,-5, 0, 1
                         },
                         type = "MESH",
                     },
+                    {
+                        id = "station/opencut/oc_wall_cube.msh",
+                        transf = {
+                            0.5, 0, 0, 0,
+                            0,10, 0, 0,
+                            0, 0,10, 0,
+                            0, 5, 0, 1
+                        },
+                        type = "MESH",
+                    }
                 },
                 matConfigs = {
                     {0, },

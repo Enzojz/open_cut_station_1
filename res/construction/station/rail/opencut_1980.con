@@ -62,9 +62,10 @@ local config = {
     platformDwlink = "station/train/passenger/opencut/1990/platform_downstairs.mdl",
     stationHouse = "station/train/passenger/opencut/1990/main_building_2.mdl",
     passEntry = "station/train/passenger/opencut/pass_entry_2.mdl",
-    sideWall = "station/train/passenger/opencut/wall_20.mdl",
-    sideWallFst = "station/train/passenger/opencut/wall_fst.mdl",
-    sideWallLst = "station/train/passenger/opencut/wall_lst.mdl",
+    sideWall = "station/train/passenger/opencut/wall_20_2.mdl",
+    sideWallFst = "station/train/passenger/opencut/wall_fst_2.mdl",
+    sideWallLst = "station/train/passenger/opencut/wall_lst_2.mdl",
+    paving = "station/train/passenger/opencut/paving_base.mdl",
 }
 
 data = station.dataCallback(config)

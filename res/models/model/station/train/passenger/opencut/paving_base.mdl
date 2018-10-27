@@ -1,24 +1,18 @@
 function data()
     return {
-        boundingInfo = {
-            bbMax = { 1, 5, 10 },
-            bbMin = { -1, -5, 0 },
-        },
         collider = {
-            params = {
-            
-            },
-            type = "MESH",
+            params = {},
+            type = "MESH"
         },
         lods = {
             {
                 children = {
                     {
-                        id = "station/opencut/oc_wall_prism.msh",
+                        id = "station/opencut/paving_base.msh",
                         transf = {
-                            2, 0, 0, 0,
-                            0,10, 0, 0,
-                            0, 0,10, 0,
+                            1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
                             0, 0, 0, 1
                         },
                         type = "MESH",
@@ -29,12 +23,12 @@ function data()
                 },
                 static = false,
                 visibleFrom = 0,
-                visibleTo = 1000,
+                visibleTo = 5000,
             },
         },
         metadata = {
             cost = {
-                price = 10000,
+                price = 0,
             },
         },
     

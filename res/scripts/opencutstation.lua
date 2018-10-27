@@ -522,11 +522,19 @@ local function updateFn(config)
                         coor.scaleZ((-height + 0.8) / 10),
                         coor.trans(coor.xyz(table.unpack(s.v)))
                 ) end)
+                
+            local paving =
+                pipe.new
+                * func.seq(1, nSeg * 4)
+                * pipe.map(function(i) return i * 5 - 0.5 * (5 + length) end)
+                * pipe.mapFlatten(function(s) return {{xMin + 0.5, s, height}, {xMax - 0.5, s, height}} end)
+                * pipe.map(function(s) return newModel(config.paving, coor.trans(coor.xyz(table.unpack(s)))) end)
             
             result.models =
                 pipe.new
                 + station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0))
                 + sideWalls
+                + paving
                 + buildAllStairs()
                 + buildFences(nSeg, overpasses / {0, 1})
                 + buildPass(overpasses, overpassEntry, config)
