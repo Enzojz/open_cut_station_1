@@ -1,0 +1,75 @@
+local laneutil = require "laneutil"
+local vec3 = require "vec3"
+local transf = require "transf"
+
+function data()
+    return {
+            
+            collider = {
+                params = {
+                
+                },
+                type = "MESH",
+            
+            },
+            lods = {
+                {
+                    animations = {
+                    },
+                    children = {
+                        {
+                            id = "station/road/streetstation/lod_0_tickets_new_1.msh",
+                            transf = {
+                                1, 0, 0, 0, 
+                                0, 1, 0, 0, 
+                                0, 0, 1, 0, 
+                                2, 3.5, 0.8, 1,
+                            },
+                            type = "MESH",
+                        },
+                        {
+                            id = "station/road/streetstation/lod_0_tickets_new_1.msh",
+                            transf = {
+                                1, 0, 0, 0, 
+                                0, 1, 0, 0, 
+                                0, 0, 1, 0, 
+                                3, 3.5, 0.8, 1,
+                            },
+                            type = "MESH",
+                        }
+                    },
+                    events = {
+                    },
+                    matConfigs = {
+                        {
+                        },
+                    },
+                    static = false,
+                    visibleFrom = 0,
+                    visibleTo = 3530,
+                
+                },
+            },
+            metadata = {
+                transportNetworkProvider = {
+                    laneLists = {
+                        {
+                            transportModes = {"PERSON"},
+                            nodes = laneutil.makeLanes({
+                                    -- lanes
+                                    {{0.5, 4.75, 0.8}, {0.5, 4.0, 0.8}, {0.0, -1.75, 0}, {0.0, -1.75, 0}, 1.5},
+                                    {{-0.5, 4.75, 0.8}, {-0.5, 4.0, 0.8}, {0.0, -1.75, 0}, {0.0, -1.75, 0}, 1.5},
+                                    
+                                    {{0.5, 4.0, 0.8}, {0, 2.75, 0.8}, {0, -1, 0}, {0, -1, 0}, 1.5},
+                                    {{-0.5, 4.0, 0.8}, {0, 2.75, 0.8}, {0, -1, 0}, {0, -1, 0}, 1.5},
+                                    
+                                    {{0.5, 4.0, 0.8}, {0, 2.25, 1.2}, {0, -1, 0}, {0, -1, 0}, 1.5},
+                                    {{-0.5, 4.0, 0.8}, {0, 2.25, 1.2}, {0, -1, 0}, {0, -1, 0}, 1.5},
+                            })
+                        }
+                    },
+                }
+            }
+    
+    }
+end
