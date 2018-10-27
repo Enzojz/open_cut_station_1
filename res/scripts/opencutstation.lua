@@ -513,9 +513,9 @@ local function updateFn(config)
             
             local sideWalls =
                 pipe.new
-                * func.seq(1, nSeg)
-                * pipe.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) end)
-                * pipe.map2(sideWallPatterns(nSeg), function(y, m) return {y = y, m = m} end)
+                * func.seq(0, nSeg)
+                * pipe.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) + 0.5 * station.segmentLength end)
+                * pipe.map2(sideWallPatterns(nSeg + 1), function(y, m) return {y = y, m = m} end)
                 * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 0.05, s.y, height}}, {m = s.m, v = {xMax + 0.05, s.y, height}}} end)
                 * pipe.map(function(s)
                     return newModel(s.m,
@@ -525,7 +525,7 @@ local function updateFn(config)
                 
             local paving =
                 pipe.new
-                * func.seq(1, nSeg * 4)
+                * func.seq(-3, nSeg * 4 + 4)
                 * pipe.map(function(i) return i * 5 - 0.5 * (5 + length) end)
                 * pipe.mapFlatten(function(s) return {{xMin + 0.5, s, height}, {xMax - 0.5, s, height}} end)
                 * pipe.map(function(s) return newModel(config.paving, coor.trans(coor.xyz(table.unpack(s)))) end)
@@ -585,8 +585,8 @@ local function updateFn(config)
             
             local fBase = station.surfaceOf(coor.xyz(xMax - xMin + 0.5, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
             local fSlot0 = station.surfaceOf(coor.xyz(xMax - xMin - 2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
-            local fSlot1 = station.surfaceOf(coor.xyz(2.5, length, 0), coor.xyz(xMin + 1, 0, height))
-            local fSlot2 = station.surfaceOf(coor.xyz(2.5, length, 0), coor.xyz(xMax - 1, 0, height))
+            local fSlot1 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMin + 1, 0, height))
+            local fSlot2 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMax - 1, 0, height))
             local fOutter = station.surfaceOf(coor.xyz(xMax - xMin + 4, yMax - yMin + 4, 0), coor.xyz((xMax + xMin) * 0.5, 0, 0.8))
             local fHouse = station.surfaceOf(coor.xyz(18, 18, 0), coor.xyz(-7.5, 0, 0))
             
@@ -652,6 +652,8 @@ local opencutstation = {
                     description = _("An open-cut station with passes options.")
                 },
                 availability = config.availability,
+                skipCollision = true,
+                autoRemovable = false,
                 order = config.order,
                 soundConfig = config.soundConfig,
                 params = params(),
