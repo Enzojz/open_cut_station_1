@@ -27,7 +27,7 @@ function data()
                 matConfigs = {
                     {0, },
                 },
-                static = true,
+                static = false,
                 visibleFrom = 0,
                 visibleTo = 1000,
             },
