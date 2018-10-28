@@ -106,8 +106,8 @@ function data()
                     * pipe.mapFlatten(function(m)
                         return 
                         {
-                            newModel(paving, coor.xXY(), coor.transX(-2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 - m, 0.5)), mShear, mOffset),
-                            newModel(paving, coor.xXY(), coor.transX(2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 - m, 0.5)), mShear, mOffset)
+                            newModel(paving, coor.xXY(), coor.transX(-2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset),
+                            newModel(paving, coor.xXY(), coor.transX(2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset)
                         }
                         end
                     )
