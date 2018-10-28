@@ -9,6 +9,10 @@ Features:
 
 ---------------
 Changelog
+1.6
+Reimplementation of terrain-cutting to avoid zig-zags and problems upon rebuilding
+Thinner and more realistic retaining wall
+The retaining wall in the station and assert are aligned to "Track Design Patterns" mod
 1.5
 Added "distance to track" option to retaining wall
 1.4
@@ -38,6 +42,10 @@ Caractéristiques :
 
 ---------------
 Changelog
+1.6
+Réimplementation d'alignement de terrain pour éviter les zigzags et les problèmes sur la terrain lors la reconstruction
+Mur de soutènement plus fin et réalistique
+Les mur de soutènement sont bien alignés à mod "Track Design Patterns"
 1.5
 Ajout d'option de distance vers la voie pour mur de soutènement
 1.4
@@ -67,6 +75,10 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.6
+重写了切割地表的算法，消除了锯齿和重建车站时的地表错误
+更薄更真实护土墙
+护土墙距离轨道的距离以“参数化轨道”为标准进行了对齐
 1.5
 增加了护土墙至轨道距离选项
 1.4

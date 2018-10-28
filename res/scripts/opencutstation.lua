@@ -537,7 +537,7 @@ local function updateFn(config)
             local railEdges = pipe.new + normal + ext1 + ext2
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
-                -- + sideEdges
+                + sideEdges
             
             local sideWalls =
                 pipe.new
