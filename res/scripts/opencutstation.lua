@@ -49,6 +49,10 @@ local stairModels = {
         model = "station/train/passenger/opencut/stairs_flat_int_nolane.mdl",
         delta = coor.xyz(0, 0, 0)
     },
+    sidenofence = {
+        model = "station/train/passenger/opencut/stairs_flat_side_nofence.mdl",
+        delta = coor.xyz(0, 0, 0)
+    },
 }
 
 local fence = "station/train/passenger/opencut/fence_flat_side.mdl"
@@ -118,6 +122,9 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + func.map(xOffsets, function(offset)
                 return newModel(stairModels.side.model, coor.rotZ(math.pi) * m * coor.trans(coor.xyz(offset.x, pos, zOffset)))
             end)
+            + func.map({offsetMin, offsetMax}, function(offset)
+                return newModel(stairModels.sidenofence.model, coor.scaleX(0.08), coor.rotZ(math.pi) * m * coor.trans(coor.xyz(offset, pos, zOffset)))
+            end)
     end
     
     local buildAllStairs = function()
@@ -136,14 +143,20 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 * pipe.map(function(_) return stairModels.base end)
                 * func.bind(buildStairs, nil, coor.o, coor.transZ(-1 + zOffset) * coor.transX(offset.x))
             end)
+            + func.mapFlatten({offsetMin, offsetMax}, function(offset) return
+                {
+                    newModel(stairModels.intnolane.model, coor.scaleX(0.08), coor.transX(offset) * coor.transZ(zOffset)),
+                    newModel(stairModels.intnolane.model, coor.scaleX(0.08), coor.rotZ(math.pi) * coor.transX(offset) * coor.transZ(zOffset)),
+                }
+            end)
     end
     
     
     local sidePassesLimits = function(w, length, overpasses)
         local intersections = pipe.new * func.map(overpasses, retrivePos)
         return
-            offsetMin - 0.5 - w,
-            offsetMax + 0.5 + w,
+            offsetMin - 0.75 - w,
+            offsetMax + 0.75 + w,
             (offsetMin + offsetMax) * 0.5,
             table.unpack(
                 (
@@ -262,7 +275,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local buildPass = function(pos, hasEntry, config)
         return func.mapFlatten(pos, function(p)
             local pos, f, t = retrivePos(p)
-            return pipe.new
+            return 
+                pipe.new
                 * func.seq(f, t)
                 * pipe.mapFlatten(function(yOffset)
                     return
@@ -270,6 +284,20 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                             {
                                 newModel(stairModels.intnolane.model, coor.trans(coor.xyz(offset.x, yOffset, zOffset))),
                                 newModel(stairModels.intnolane.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, yOffset, zOffset))),
+                            }
+                        end)
+                end)
+                +
+                pipe.new
+                * func.seq(f, t)
+                * pipe.mapFlatten(function(yOffset)
+                    return
+                        func.mapFlatten({offsetMin, offsetMax}, function(offset) return
+                            {
+                                newModel(stairModels.intnolane.model, coor.scaleX(0.08), coor.trans(coor.xyz(offset, yOffset, zOffset))),
+                                newModel(stairModels.intnolane.model, coor.scaleX(0.08), coor.rotZ(math.pi), coor.trans(coor.xyz(offset, yOffset, zOffset))),
+                                newModel(stairModels.sidenofence.model, coor.scaleX(0.08), coor.trans(coor.xyz(offset, f - 0.5, zOffset))),
+                                newModel(stairModels.sidenofence.model, coor.scaleX(0.08), coor.rotZ(math.pi) * coor.trans(coor.xyz(offset, t + 0.5, zOffset))),
                             }
                         end)
                 end)
@@ -321,7 +349,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         return pipe.new
             * func.seq(-nSeg * station.segmentLength * 0.5 + 1, nSeg * station.segmentLength * 0.5 - 1)
             * pipe.filter(function(p) return not func.contains(taken, p) end)
-            * pipe.mapFlatten(function(i) return {{x = offsetMin - 0.15, n = i}, {x = offsetMax + 0.15, n = i}} end)
+            * pipe.mapFlatten(function(i) return {{x = offsetMin - 0.4, n = i}, {x = offsetMax + 0.4, n = i}} end)
             * pipe.map(function(v) return {v.x, v.n, zOffset} end)
             * pipe.map(function(v) return newModel(fence, coor.rotZ(math.pi * 0.5), coor.trans(coor.xyz(table.unpack(v)))) end)
             + pipe.new
@@ -330,10 +358,10 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     local _, f, t = retrivePos(p)
                     return
                         {
-                            newModel(fenceInter, coor.flipX(), coor.trans(coor.xyz(offsetMin + 0.5, t, zOffset))),
-                            newModel(fenceInter, coor.flipY(), coor.flipX(), coor.trans(coor.xyz(offsetMin + 0.5, f, zOffset))),
-                            newModel(fenceInter, coor.trans(coor.xyz(offsetMax - 0.5, t, zOffset))),
-                            newModel(fenceInter, coor.flipY(), coor.trans(coor.xyz(offsetMax - 0.5, f, zOffset)))
+                            newModel(fenceInter, coor.flipX(), coor.trans(coor.xyz(offsetMin + 0.25, t, zOffset))),
+                            newModel(fenceInter, coor.flipY(), coor.flipX(), coor.trans(coor.xyz(offsetMin + 0.25, f, zOffset))),
+                            newModel(fenceInter, coor.trans(coor.xyz(offsetMax - 0.25, t, zOffset))),
+                            newModel(fenceInter, coor.flipY(), coor.trans(coor.xyz(offsetMax - 0.25, f, zOffset)))
                         }
                 end)
     
@@ -509,14 +537,14 @@ local function updateFn(config)
             local railEdges = pipe.new + normal + ext1 + ext2
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
-                + sideEdges
+                -- + sideEdges
             
             local sideWalls =
                 pipe.new
                 * func.seq(0, nSeg)
                 * pipe.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) + 0.5 * station.segmentLength end)
                 * pipe.map2(sideWallPatterns(nSeg + 1), function(y, m) return {y = y, m = m} end)
-                * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 0.05, s.y, height}}, {m = s.m, v = {xMax + 0.05, s.y, height}}} end)
+                * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 0.45, s.y, height}}, {m = s.m, v = {xMax + 0.45, s.y, height}}} end)
                 * pipe.map(function(s)
                     return newModel(s.m,
                         coor.scaleZ((-height + 0.8) / 10),
@@ -525,9 +553,9 @@ local function updateFn(config)
                 
             local paving =
                 pipe.new
-                * func.seq(-3, nSeg * 4 + 4)
+                * func.seq(-1, nSeg * 4 + 2)
                 * pipe.map(function(i) return i * 5 - 0.5 * (5 + length) end)
-                * pipe.mapFlatten(function(s) return {{xMin + 0.5, s, height}, {xMax - 0.5, s, height}} end)
+                * pipe.mapFlatten(function(s) return {{xMin + 0.1, s, height}, {xMax - 0.1, s, height}} end)
                 * pipe.map(function(s) return newModel(config.paving, coor.trans(coor.xyz(table.unpack(s)))) end)
             
             result.models =
@@ -538,7 +566,7 @@ local function updateFn(config)
                 + buildAllStairs()
                 + buildFences(nSeg, overpasses / {0, 1})
                 + buildPass(overpasses, overpassEntry, config)
-                + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 4.25))}
+                + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 4.5))}
                 + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
             
             result.terminalGroups = station.makeTerminals(xuIndex)
@@ -584,9 +612,9 @@ local function updateFn(config)
                 end
             
             local fBase = station.surfaceOf(coor.xyz(xMax - xMin + 0.5, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
-            local fSlot0 = station.surfaceOf(coor.xyz(xMax - xMin - 2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
-            local fSlot1 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMin + 1, 0, height))
-            local fSlot2 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMax - 1, 0, height))
+            local fSlot0 = station.surfaceOf(coor.xyz(xMax - xMin - 1.2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
+            local fSlot1 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMin + 0.6, 0, height))
+            local fSlot2 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMax - 0.6, 0, height))
             local fOutter = station.surfaceOf(coor.xyz(xMax - xMin + 4, yMax - yMin + 4, 0), coor.xyz((xMax + xMin) * 0.5, 0, 0.8))
             local fHouse = station.surfaceOf(coor.xyz(18, 18, 0), coor.xyz(-7.5, 0, 0))
             
