@@ -80,6 +80,12 @@ function data()
                 values = {_("Yes"), _("No")},
                 defaultIndex = 0
             },
+            {
+                key = "thickness",
+                name = _("Thickness"),
+                values = func.map({0.5, 0.75, 1, 1.5, 2}, tostring),
+                defaultIndex = 0
+            }
         },
         
         updateFn = function(params)
@@ -93,31 +99,18 @@ function data()
             local totalLength = wallLength * nSeg
             local adjHeight = heightAdj[params.heightAdj + 1]
             local segAdj = adjHeight / nSeg
+            local sX = coor.scaleX(({1, 1.5, 2, 3, 4})[params.thickness + 1]) * coor.transX(({0, -0.125, -0.25, -0.5, -0.75})[params.thickness + 1]) * coor.rotZ(0.5 * pi)
+
             
             local adjN = function(n) return (params.adjSide == 0) and n or nSeg - n + 1 end
             local mShear = coor.shearZoX(({-0.075, -0.06, -0.04, -0.02, 0, 0.02, 0.04, 0.06, 0.075})[params.slope + 1])
             local mOffset = coor.transY(-params.offset -0.2)
             result.models =
                 pipe.new
-                * func.seq(1, nSeg)
-                * pipe.mapFlatten(function(n)
-                    return pipe.new 
-                    * func.seq(0, params.offset)
-                    * pipe.mapFlatten(function(m)
-                        return 
-                        {
-                            newModel(paving, coor.rotZ(0.5 * pi), coor.transX(-2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset),
-                            newModel(paving, coor.rotZ(0.5 * pi), coor.transX(2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset)
-                        }
-                        end
-                    )
-                end)
-                +
-                pipe.new
                 * func.seq(0, mSeg - 2)
                 * pipe.mapFlatten(function(m) return func.seqMap({1, nSeg}, function(n) return {m = m, n = n} end) end)
                 * pipe.map(function(v)
-                    return newModel(rWall, coor.rotZ(0.5 * pi), coor.scaleZ(zFactor), coor.trans(coor.xyz((v.n - 0.5) * wallLength - 0.5 * totalLength, -2.75, v.m * zHeight)), mShear, mOffset
+                    return newModel(rWall, sX, coor.scaleZ(zFactor), coor.trans(coor.xyz((v.n - 0.5) * wallLength - 0.5 * totalLength, -2.75, v.m * zHeight)), mShear, mOffset
                 )
                 end)
                 +
@@ -125,8 +118,8 @@ function data()
                 * func.seq(1, nSeg)
                 * pipe.mapFlatten(function(n)
                     return {
-                        newModel(rWall, coor.rotZ(0.5 * pi), coor.scaleZ((zHeight + (adjN(n) - 1) * segAdj) * 0.1), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2.75, (mSeg - 1) * zHeight)), mShear, mOffset),
-                        newModel(rWall, coor.rotZ(0.5 * pi), coor.scaleZ(0.5), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2.75, -5)), mShear, mOffset)
+                        newModel(rWall, sX, coor.scaleZ((zHeight + (adjN(n) - 1) * segAdj) * 0.1), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2.75, (mSeg - 1) * zHeight)), mShear, mOffset),
+                        newModel(rWall, sX, coor.scaleZ(0.5), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2.75, -5)), mShear, mOffset)
                     }
                 
                 end)
@@ -134,13 +127,33 @@ function data()
                 pipe.new
                 * func.seq(1, nSeg)
                 * pipe.map(function(n) return
-                    newModel(tWalls[params.adjSide + 1], coor.rotZ(0.5 * pi),
+                    newModel(tWalls[params.adjSide + 1], 
+                        sX,
                         coor.scaleZ(segAdj * 0.1),
                         coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2.75, height + (adjN(n) - 1) * segAdj)),
                         mShear, mOffset
                 )
                 end)
                 * function(w) return params.heightAdj == 0 and {} or w end
+                +
+                (params.aligned == 0 and 
+                    pipe.new
+                    * func.seq(1, nSeg)
+                    * pipe.mapFlatten(function(n)
+                        return pipe.new 
+                        * func.seq(0, params.offset)
+                        * pipe.mapFlatten(function(m)
+                            return 
+                            {
+                                newModel(paving, coor.rotZ(0.5 * pi), coor.transX(-2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset),
+                                newModel(paving, coor.rotZ(0.5 * pi), coor.transX(2.5), coor.scaleZ(zFactor), coor.trans(coor.xyz((n - 0.5) * wallLength - 0.5 * totalLength, -2 + m, 0.5)), mShear, mOffset)
+                            }
+                            end
+                        )
+                    end)
+                    or {}
+                )
+                
             
             local ptA = coor.xyz(totalLength * 0.5, 0, height + (params.adjSide == 0 and 0 or adjHeight)) .. mShear * mOffset
             local ptB = coor.xyz(-totalLength * 0.5, 0, height + (params.adjSide == 0 and adjHeight or 0)) .. mShear * mOffset
@@ -215,8 +228,9 @@ function data()
                     }
                 }
         
-            
-                result.groundFaces = { {face = func.map(slot, coor.vec2Tuple), modes = {{type = "FILL", key = "hole"}}} }
+                if (params.aligned == 0) then
+                    result.groundFaces = { {face = func.map(slot, coor.vec2Tuple), modes = {{type = "FILL", key = "hole"}}} }
+                end
 
             return result
         end
