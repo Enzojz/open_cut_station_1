@@ -275,7 +275,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local buildPass = function(pos, hasEntry, config)
         return func.mapFlatten(pos, function(p)
             local pos, f, t = retrivePos(p)
-            return 
+            return
                 pipe.new
                 * func.seq(f, t)
                 * pipe.mapFlatten(function(yOffset)
@@ -550,7 +550,7 @@ local function updateFn(config)
                         coor.scaleZ((-height + 0.8) / 10),
                         coor.trans(coor.xyz(table.unpack(s.v)))
                 ) end)
-                
+            
             local paving =
                 pipe.new
                 * func.seq(-1, nSeg * 4 + 2)
