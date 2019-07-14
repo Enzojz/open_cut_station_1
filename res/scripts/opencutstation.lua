@@ -187,14 +187,16 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                 pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
                     station.toEdges(o, vec, vec * 0.25)
-                    * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
+                    * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = true} end)
                 end
-                + func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
+                +
+                pipe.new * func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
                     function(f, t) return {
                         edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)),
                         snap = {false, false}, align = false,
                         stopMarker = (t - f > 0 and t - f < w + 3) and {0.1, 0.1} or false
                     } end)
+                * pipe.map2({true, false}, function(e, f) return func.with(e, {canFree = f}) end)
         end
         
         
@@ -205,14 +207,14 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideB)
             + ignoreIf(not sideB or length < 160)(
                 {
-                    {edge = station.toEdge(coor.xyz(xposB, w + 2, 0.8), coor.xyz(2 * w, 0, -0.8)), snap = {false, true}, align = true}
+                    {edge = station.toEdge(coor.xyz(xposB, w + 2, 0.8), coor.xyz(2 * w, 0, -0.8)), snap = {false, true}, align = true, canFree = true}
                 }
             )
             + ignoreIf(not sideA)(
                 {
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, stopMarker = {nil, 0.7}},
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, stopMarker = {nil, 0.7}},
-                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true}
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = true, stopMarker = {nil, 0.7}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = true, stopMarker = {nil, 0.7}},
+                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true, canFree = true}
                 })
             + func.mapFlatten(overpasses,
                 function(overpass)
@@ -223,7 +225,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                         * pipe.concat({xposA, xposB})
                         * pipe.sort(function(x, y) return x < y end)
                         * function(offsets) return func.map2(func.range(offsets, 1, #offsets - 1), func.range(offsets, 2, #offsets),
-                            function(f, t) return {edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)), snap = {false, false}, align = false} end)
+                            function(f, t) return {edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)), snap = {false, false}, align = false, canFree = false} end)
                         end
                         + station.toEdges(coor.xyz(xposA, pos, 0.8), coor.xyz(-3, 0, 0), coor.xyz(-1, 0, 0))
                         * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
@@ -253,7 +255,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         end
         
         return {
-            func.with(station.prepareEdges(nonAlignedEdges, false), streetProto(false)),
+            func.with(station.prepareEdges(nonAlignedEdges, freeNodes), streetProto(false)),
             func.with(station.prepareEdges(alignedEdges, freeNodes), streetProto(true)),
             {
                 type = "STREET",

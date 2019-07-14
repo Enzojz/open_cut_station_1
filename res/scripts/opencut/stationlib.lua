@@ -198,7 +198,9 @@ stationlib.prepareEdges = function(edges, freeNodes)
     return {
         edges = edges * pipe.map(pipe.select("edge")) * coor.make,
         snapNodes = freeNodes and {} or snapNodes(edges),
-        freeNodes = freeNodes and func.seq(0, #func.mapFlatten(edges, pipe.select("edge")) * 2 - 1) or {}
+        freeNodes = freeNodes
+        and (edges * pipe.map2(func.seq(1, #edges), function(e, i) return e.canFree and {i * 2, i * 2 - 1} or {} end) * pipe.flatten())
+        or {}
     }
 end
 
