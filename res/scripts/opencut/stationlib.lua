@@ -194,11 +194,11 @@ local snapNodes = function(edges)
         * pipe.map(pipe.select("index"))
 end
 
-stationlib.prepareEdges = function(edges)
+stationlib.prepareEdges = function(edges, freeNodes)
     return {
         edges = edges * pipe.map(pipe.select("edge")) * coor.make,
-        snapNodes = snapNodes(edges),
-        freeNodes = func.seq(0, #func.mapFlatten(edges, pipe.select("edge")) * 2 - 1)
+        snapNodes = freeNodes and {} or snapNodes(edges),
+        freeNodes = freeNodes and func.seq(0, #func.mapFlatten(edges, pipe.select("edge")) * 2 - 1) or {}
     }
 end
 

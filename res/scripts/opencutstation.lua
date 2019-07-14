@@ -179,7 +179,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     )
     end
     
-    local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB)
+    local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB, freeNodes)
         local xposA, xposB, _, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
         
         local makeSide = function(xpos, yOffsets, fixed)
@@ -253,8 +253,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         end
         
         return {
-            func.with(station.prepareEdges(nonAlignedEdges), streetProto(false)),
-            func.with(station.prepareEdges(alignedEdges), streetProto(true)),
+            func.with(station.prepareEdges(nonAlignedEdges, freeNodes), streetProto(false)),
+            func.with(station.prepareEdges(alignedEdges, freeNodes), streetProto(true)),
             {
                 type = "STREET",
                 params =
@@ -539,15 +539,11 @@ local function updateFn(config)
             
             local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
             
-            local sideEdges, stops = buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB)
+            local sideEdges, stops = buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB, (params.freeNodes == 1) or false)
             local railEdges = pipe.new + normal + ext1 + ext2
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
                 + sideEdges
-            
-            result.edgeLists = 
-                result.edgeLists
-                * pipe.map(function(e) return func.with(e, { freeNodes = (params.freeNodes == 1) and e.freeNodes or {} }) end)
             
             local sideWalls =
                 pipe.new
