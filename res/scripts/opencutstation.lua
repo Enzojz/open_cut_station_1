@@ -11,9 +11,9 @@ local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
 
 local tramType = {"NO", "YES", "ELECTRIC"}
 local streetProfile = {
-    {6, "new_small.lua"},
-    {9, "new_medium.lua"},
-    {12, "new_large.lua"}
+    {5.75, "new_small.lua"},
+    {8.75, "new_medium.lua"},
+    {11.75, "new_large.lua"}
 }
 
 local stairModels = {
@@ -155,8 +155,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     local sidePassesLimits = function(w, length, overpasses)
         local intersections = pipe.new * func.map(overpasses, retrivePos)
         return
-            offsetMin - 0.75 - w,
-            offsetMax + 0.75 + w,
+            offsetMin - 1 - w,
+            offsetMax + 1 + w,
             (offsetMin + offsetMax) * 0.5,
             table.unpack(
                 (
@@ -253,7 +253,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         end
         
         return {
-            func.with(station.prepareEdges(nonAlignedEdges, freeNodes), streetProto(false)),
+            func.with(station.prepareEdges(nonAlignedEdges, false), streetProto(false)),
             func.with(station.prepareEdges(alignedEdges, freeNodes), streetProto(true)),
             {
                 type = "STREET",
