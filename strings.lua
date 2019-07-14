@@ -9,6 +9,8 @@ Features:
 
 ---------------
 Changelog
+1.7
+Added option to have free streets
 1.6
 Reimplementation of terrain-cutting to avoid zig-zags and problems upon rebuilding
 Thinner and more realistic retaining wall
@@ -42,6 +44,8 @@ Caractéristiques :
 
 ---------------
 Changelog
+1.7
+Ajoute d'une option pour avoir des voies à la destruction libre.
 1.6
 Réimplementation d'alignement de terrain pour éviter les zigzags et les problèmes sur la terrain lors la reconstruction
 Mur de soutènement plus fin et réalistique
@@ -75,6 +79,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.7
+增加了可自由修改道路的选项
 1.6
 重写了切割地表的算法，消除了锯齿和重建车站时的地表错误
 更薄更真实护土墙
@@ -125,7 +131,8 @@ function data()
             ["Concrete Retaining Wall"] = "Mur de soutènement en béton",
             ["Entry on overpasses"] = "Entrée sur pont-route",
             ["Bus/Tram Stop"] = "Arrêt de bus/tram",
-            ["Distance to track"] = "Distance vers la voie"
+            ["Distance to track"] = "Distance vers la voie",
+            ["Free streets"] = "Voie à la destruction libre"
         },
         zh_CN = {
             ["mod"] = "地堑结构车站和护土墙",
@@ -148,7 +155,8 @@ function data()
             ["Concrete Retaining Wall"] = "护土墙",
             ["Entry on overpasses"] = "街道进站口",
             ["Bus/Tram Stop"] = "公交车站",
-            ["Distance to track"] = "距离轨道"
+            ["Distance to track"] = "距离轨道",
+            ["Free streets"] = "可自由修改道路"
         },
     }
 end

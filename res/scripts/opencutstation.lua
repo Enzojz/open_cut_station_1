@@ -428,6 +428,12 @@ local function params()
             name = _("Bus/Tram Stop"),
             values = {_("No"), _("Yes")},
             defaultIndex = 1
+        },
+        {
+            key = "freeNodes",
+            name = _("Free streets"),
+            values = {_("No"), _("Yes")},
+            defaultIndex = 0
         }
     }
 end
@@ -538,6 +544,10 @@ local function updateFn(config)
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
                 + sideEdges
+            
+            result.edgeLists = 
+                result.edgeLists
+                * pipe.map(function(e) return func.with(e, { freeNodes = (params.freeNodes == 1) and e.freeNodes or {} }) end)
             
             local sideWalls =
                 pipe.new
