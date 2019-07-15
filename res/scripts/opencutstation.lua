@@ -179,27 +179,27 @@ local makeBuilders = function(config, xOffsets, uOffsets)
     )
     end
     
-    local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB, freeNodes)
-        local xposA, xposB, _, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
+    local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB, canFree)
         
+        local xposA, xposB, _, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
         local makeSide = function(xpos, yOffsets, fixed)
             return
                 pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
                     station.toEdges(o, vec, vec * 0.5)
-                    * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = true} end)
+                    * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = canFree} end)
                 end
                 +
                 pipe.new * func.map2(func.range(yOffsets, 1, #yOffsets - 1), func.range(yOffsets, 2, #yOffsets),
                     function(f, t) return {
                         edge = station.toEdge(coor.xyz(xpos, f, 0.8), coor.xyz(0, t - f, 0)),
-                        snap = {false, false}, align = false,
+                        snap = { canFree == nil, false },
+                        align = false,
                         stopMarker = (t - f > 0 and t - f < w + 3) and {0.1, 0.1} or false
                     } end)
-                * pipe.map2({true, false}, function(e, f) return func.with(e, {canFree = f}) end)
+                * pipe.map2({true, false}, function(e, f) return func.with(e, {canFree = f and canFree}) end)
         end
-        
-        
+                
         local edges = pipe.new
             + makeSide(xposA, func.filter(yOffsetsA, function(y) return y <= 0 end), coor.xyz(xposA - 2 * w, -length * 0.5, 0.16)) * ignoreIf(not sideA)
             + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideA)
@@ -212,9 +212,9 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             )
             + ignoreIf(not sideA)(
                 {
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = true, stopMarker = {nil, 0.7}},
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = true, stopMarker = {nil, 0.7}},
-                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true, canFree = true}
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
+                    {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true, canFree = canFree}
                 })
             + func.mapFlatten(overpasses,
                 function(overpass)
@@ -224,19 +224,29 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                         * pipe.map(pipe.select("x"))
                         * pipe.concat({xposA, xposB})
                         * pipe.sort(function(x, y) return x < y end)
-                        * function(offsets) return func.map2(func.range(offsets, 1, #offsets - 1), func.range(offsets, 2, #offsets),
-                            function(f, t) return {edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)), snap = {false, false}, align = false, canFree = false} end)
+                        * function(offsets) return pipe.mapn(
+                            func.range(offsets, 1, #offsets - 1), 
+                            func.range(offsets, 2, #offsets),
+                            func.seq(1, #offsets - 1)
+                        )(
+                            function(f, t, i) return {
+                                edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)), 
+                                snap = { i == 1 and canFree == nil and sideA, (i == #offsets - 1) and canFree == nil and sideB}, 
+                                align = false, 
+                                canFree = false
+                            } end)
                         end
+
                         + station.toEdges(coor.xyz(xposA, pos, 0.8), coor.xyz(-3, 0, 0), coor.xyz(-1, 0, 0))
-                        * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
+                        * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = false} end)
                         * ignoreIf(sideA)
                         + station.toEdges(coor.xyz(xposB, pos, 0.8), coor.xyz(3, 0, 0), coor.xyz(1, 0, 0))
-                        * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true} end)
+                        * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = false} end)
                         * ignoreIf(sideB)
                 end)
         
-        local alignedEdges = edges * pipe.filter(function(e) return e.align end) * pipe.map(function(e) return func.with(e, {canFree = e.canFree and freeNodes}) end)
-        local nonAlignedEdges = edges * pipe.filter(function(e) return not e.align end) * pipe.map(function(e) return func.with(e, {canFree = e.canFree and freeNodes}) end)
+        local alignedEdges = edges * pipe.filter(function(e) return e.align and e.canFree ~= nil end)
+        local nonAlignedEdges = edges * pipe.filter(function(e) return not e.align and e.canFree ~= nil end)
         
         local stopList = (nonAlignedEdges + alignedEdges)
             * pipe.map(function(e) return e.stopMarker or false end)
@@ -269,7 +279,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                         sideA and station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(xposA - w, 0, 0)) or station.toEdge(coor.xyz(-17.25, 0, 0), coor.xyz(-20, 0, 0))
                     }
                 ),
-                snapNodes = sideA and {} or {1}
+                snapNodes = (sideA and canFree ~= nil) and {} or {1}
             }
         }, stopList
     end
@@ -434,7 +444,7 @@ local function params()
         {
             key = "freeNodes",
             name = _("Free streets"),
-            values = {_("No"), _("Yes")},
+            values = {_("No"), _("Yes"), ("Not built")},
             defaultIndex = 0
         }
     }
@@ -541,7 +551,7 @@ local function updateFn(config)
             
             local sideA, sideB = func.contains({1, 3}, params.sidepass), func.contains({2, 3}, params.sidepass)
             
-            local sideEdges, stops = buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB, (params.freeNodes == 1) or false)
+            local sideEdges, stops = buildSidePasses(streetWidth, streetType, tramTrack, length, overpasses, sideA, sideB, ({false, true, nil})[params.freeNodes + 1])
             local railEdges = pipe.new + normal + ext1 + ext2
             result.edgeLists = pipe.new
                 + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
