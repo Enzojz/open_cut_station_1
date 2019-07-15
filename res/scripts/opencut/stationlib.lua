@@ -187,20 +187,18 @@ end
 
 local snapNodes = function(edges)
     return edges
-        * pipe.map(pipe.select("snap"))
+        * pipe.map(function(e) return func.map(e.snap, function(s) return { snap = s, canFree = e.canFree } end) end)
         * pipe.flatten()
-        * function(ls) return ls * pipe.map2(func.seq(0, #ls - 1), function(s, n) return {snap = s, index = n} end) end
-        * pipe.filter(pipe.select("snap"))
+        * function(ls) return ls * pipe.map2(func.seq(0, #ls - 1), function(s, n) return func.with(s, {index = n}) end) end
+        * pipe.filter(function(e) return e.snap and not e.canFree end)
         * pipe.map(pipe.select("index"))
 end
 
-stationlib.prepareEdges = function(edges, freeNodes)
+stationlib.prepareEdges = function(edges)
     return {
         edges = edges * pipe.map(pipe.select("edge")) * coor.make,
-        snapNodes = freeNodes and {} or snapNodes(edges),
-        freeNodes = freeNodes
-        and (edges * pipe.map2(func.seq(1, #edges), function(e, i) return e.canFree and {i * 2, i * 2 - 1} or {} end) * pipe.flatten())
-        or {}
+        snapNodes = snapNodes(edges),
+        freeNodes = edges * pipe.map2(func.seq(0, #edges - 1), function(e, i) return e.canFree and {i * 2, i * 2 + 1} or {} end) * pipe.flatten()
     }
 end
 

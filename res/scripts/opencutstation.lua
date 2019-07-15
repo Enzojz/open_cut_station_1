@@ -174,7 +174,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     * function(ls) return #ls == 0 and {p} or (ls[1] < p - 2 * w and ls / p or ls) end
                 end
                 )
-                * function(yOffsets) return {yOffsets + {2 + w, -2 - w, 0}, yOffsets + {-8 - w, 8 + w}} end
+                * function(yOffsets) return {yOffsets + {3 + w, -3 - w, 0}, yOffsets + {-8 - w, 8 + w}} end
                 * pipe.map(pipe.sort(function(x, y) return x < y end))
     )
     end
@@ -186,7 +186,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             return
                 pipe.from(coor.xyz(xpos, yOffsets[1], 0.8), fixed - coor.xyz(xpos, yOffsets[1], 0.8))
                 * function(o, vec) return
-                    station.toEdges(o, vec, vec * 0.25)
+                    station.toEdges(o, vec, vec * 0.5)
                     * pipe.map2({{false, false}, {false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = true} end)
                 end
                 +
@@ -207,7 +207,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             + makeSide(xposB, func.rev(func.filter(yOffsetsB, function(y) return y >= 0 end)), coor.xyz(xposB + 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideB)
             + ignoreIf(not sideB or length < 160)(
                 {
-                    {edge = station.toEdge(coor.xyz(xposB, w + 2, 0.8), coor.xyz(2 * w, 0, -0.8)), snap = {false, true}, align = true, canFree = true}
+                    {edge = station.toEdge(coor.xyz(xposB, 0, 0.8), coor.xyz(2 * w, 0, -0.8)), snap = {false, true}, align = true, canFree = false}
                 }
             )
             + ignoreIf(not sideA)(
@@ -235,8 +235,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                         * ignoreIf(sideB)
                 end)
         
-        local alignedEdges = edges * pipe.filter(function(e) return e.align end)
-        local nonAlignedEdges = edges * pipe.filter(function(e) return not e.align end)
+        local alignedEdges = edges * pipe.filter(function(e) return e.align end) * pipe.map(function(e) return func.with(e, {canFree = e.canFree and freeNodes}) end)
+        local nonAlignedEdges = edges * pipe.filter(function(e) return not e.align end) * pipe.map(function(e) return func.with(e, {canFree = e.canFree and freeNodes}) end)
         
         local stopList = (nonAlignedEdges + alignedEdges)
             * pipe.map(function(e) return e.stopMarker or false end)
@@ -255,8 +255,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         end
         
         return {
-            func.with(station.prepareEdges(nonAlignedEdges, freeNodes), streetProto(false)),
-            func.with(station.prepareEdges(alignedEdges, freeNodes), streetProto(true)),
+            func.with(station.prepareEdges(nonAlignedEdges), streetProto(false)),
+            func.with(station.prepareEdges(alignedEdges), streetProto(true)),
             {
                 type = "STREET",
                 params =

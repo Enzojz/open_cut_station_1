@@ -11,6 +11,7 @@ Features:
 Changelog
 1.7
 Added option to have free streets
+Fixed unused overpass entry problem
 1.6
 Reimplementation of terrain-cutting to avoid zig-zags and problems upon rebuilding
 Thinner and more realistic retaining wall
@@ -46,6 +47,7 @@ Caractéristiques :
 Changelog
 1.7
 Ajoute d'une option pour avoir des voies à la destruction libre.
+Correction l'inutilité des entrée sur pont-route
 1.6
 Réimplementation d'alignement de terrain pour éviter les zigzags et les problèmes sur la terrain lors la reconstruction
 Mur de soutènement plus fin et réalistique
@@ -81,6 +83,7 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
 Changelog
 1.7
 增加了可自由修改道路的选项
+修正了街道入口无法使用的问题
 1.6
 重写了切割地表的算法，消除了锯齿和重建车站时的地表错误
 更薄更真实护土墙
