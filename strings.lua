@@ -135,7 +135,8 @@ function data()
             ["Entry on overpasses"] = "Entrée sur pont-route",
             ["Bus/Tram Stop"] = "Arrêt de bus/tram",
             ["Distance to track"] = "Distance vers la voie",
-            ["Free streets"] = "Voie à la destruction libre"
+            ["Free streets"] = "Voie à la destruction libre",
+            ["Not build"] = "Ne pas construire"
         },
         zh_CN = {
             ["mod"] = "地堑结构车站和护土墙",
@@ -159,7 +160,8 @@ function data()
             ["Entry on overpasses"] = "街道进站口",
             ["Bus/Tram Stop"] = "公交车站",
             ["Distance to track"] = "距离轨道",
-            ["Free streets"] = "可自由修改道路"
+            ["Free streets"] = "可自由修改道路",
+            ["Not build"] = "不建造"
         },
     }
 end

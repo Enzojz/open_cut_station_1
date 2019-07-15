@@ -444,7 +444,7 @@ local function params()
         {
             key = "freeNodes",
             name = _("Free streets"),
-            values = {_("No"), _("Yes"), ("Not built")},
+            values = {_("No"), _("Yes"), ("Not build")},
             defaultIndex = 0
         }
     }
