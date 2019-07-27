@@ -9,6 +9,8 @@ Features:
 
 ---------------
 Changelog
+1.8
+Fixed lane error and street error in 1.7
 1.7
 Added option to have free streets
 Fixed unused overpass entry problem
@@ -45,6 +47,8 @@ Caractéristiques :
 
 ---------------
 Changelog
+1.8
+Correction d'erreur de vois dans 1.7
 1.7
 Ajoute d'une option pour avoir des voies à la destruction libre.
 Correction l'inutilité des entrée sur pont-route
@@ -81,6 +85,8 @@ local descZh = [[一种设置在地堑结构中的车站，可以同时设置平
  
 ---------------
 Changelog
+1.8
+修正了1.7版本中的道路和人行道错误
 1.7
 增加了可自由修改道路的选项
 修正了街道入口无法使用的问题

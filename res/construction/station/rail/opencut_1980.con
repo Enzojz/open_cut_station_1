@@ -45,6 +45,7 @@ data = rawData
 
 ==== NOTICE TO MAKE YOUR OWN UNDERGROUND STATION ====
 --]]
+
 local station = require "opencutstation"
 
 local config = {

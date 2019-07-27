@@ -174,13 +174,12 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     * function(ls) return #ls == 0 and {p} or (ls[1] < p - 2 * w and ls / p or ls) end
                 end
                 )
-                * function(yOffsets) return {yOffsets + {3 + w, -3 - w, 0}, yOffsets + {-8 - w, 8 + w}} end
+                * function(yOffsets) return {yOffsets + {3 + w, -3 - w, 0}, yOffsets + {-9 - w, 9 + w}} end
                 * pipe.map(pipe.sort(function(x, y) return x < y end))
     )
     end
     
     local buildSidePasses = function(w, type, tramTrack, length, overpasses, sideA, sideB, canFree)
-        
         local xposA, xposB, _, yOffsetsB, yOffsetsA = sidePassesLimits(w, length, overpasses)
         local makeSide = function(xpos, yOffsets, fixed)
             return
@@ -197,9 +196,9 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                         align = false,
                         stopMarker = (t - f > 0 and t - f < w + 3) and {0.1, 0.1} or false
                     } end)
-                * pipe.map2({true, false}, function(e, f) return func.with(e, {canFree = f and canFree}) end)
+                    * pipe.map2(pipe.new / true + pipe.rep(#yOffsets - 2)(false), function(e, f) return func.with(e, {canFree = f and canFree}) end)
         end
-                
+             
         local edges = pipe.new
             + makeSide(xposA, func.filter(yOffsetsA, function(y) return y <= 0 end), coor.xyz(xposA - 2 * w, -length * 0.5, 0.16)) * ignoreIf(not sideA)
             + makeSide(xposA, func.rev(func.filter(yOffsetsA, function(y) return y >= 0 end)), coor.xyz(xposA - 2 * w, length * 0.5, 0.16)) * ignoreIf(not sideA)
@@ -212,8 +211,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
             )
             + ignoreIf(not sideA)(
                 {
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -8 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
-                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 8 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, -9 - w, 0.8}, {0, -1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
+                    {edge = {{-17.25 + xposA - w, 0, 0}, {xposA, 9 + w, 0.8}, {0, 1, 0}, {1, 0, 0}}, snap = {false, false}, align = true, canFree = canFree, stopMarker = {nil, 0.7}},
                     {edge = station.toEdge(coor.xyz(-17.25 + xposA - w, 0, 0), coor.xyz(-25, 0, 0)), snap = {false, true}, align = true, canFree = canFree}
                 })
             + func.mapFlatten(overpasses,
