@@ -1,0 +1,148 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 9.6499996185303, 5.1199998855591, 16.409999847412, },
+		bbMin = { -9.7799997329712, -9.2799997329712, -2, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 9.7150001525879, 7.1999998092651, 9.2049999237061, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.065000057220459, -2.0799999237061, 7.2049999237061, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						materials = { "station/train/passenger/trainstation_1850_borders_1.mtl", "station/train/passenger/trainstation_1850_doors_and_windows_2.mtl", "station/train/passenger/trainstation_1850_floor_1.mtl", "station/train/passenger/trainstation_1850_roof_1.mtl", "station/train/passenger/trainstation_1850_wall_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_large.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d1.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -3.3499999046326, 3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d1.msh",
+						transf = { 6.1232342629258e-017, -1, -0, 0, 1, 6.1232342629258e-017, 0, 0, 0, -0, 1, 0, -1.1000000238419, 3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d2.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3.3499999046326, 3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d2.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, 1.1000000238419, 3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d1.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -3.3499999046326, -3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d1.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, -1.1000000238419, -3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d2.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3.3499999046326, -3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_doors_and_windows_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_station_d2.msh",
+						transf = { 6.1232342629258e-017, -1, -0, 0, 1, 6.1232342629258e-017, 0, 0, 0, -0, 1, 0, 1.1000000238419, -3.6500000953674, 0.81000000238419, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_detail_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_trashcan.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, -7.1999998092651, -4.8000001907349, 0, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_detail_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_trashcan.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, 7.1999998092651, -4.8000001907349, 0, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_detail_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_single_chair.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, 5.5999999046326, -4.8000001907349, 0, 1, },
+					},
+					{
+						materials = { "station/train/passenger/trainstation_1850_detail_1.mtl", },
+						mesh = "station/train/passenger/1850/lod_0_single_chair.msh",
+						transf = { 6.1232342629258e-017, 1, -0, 0, -1, 6.1232342629258e-017, 0, 0, 0, 0, 1, 0, -5.5999999046326, -4.8000001907349, 0, 1, },
+					},
+				},
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -3.8, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 4120,
+		},
+	},
+	metadata = {
+		transportNetworkProvider = {
+			laneLists = {
+				{
+					linkable = true,
+					nodes = {
+						{
+							{ 0.5, 0.5, 0.8 },
+							{ 0, -7.5, 0 },
+							1.5
+						},
+						{
+							{ 0.5, -7, 0.8 },
+							{ 0, -7.5, 0 },
+							1.5
+						},
+						{
+							{ 0.5, -7, 0.8 },
+							{ 0, -2.5, 0 },
+							1.5
+						},
+						{
+							{ 0.5, -9, 0 },
+							{ 0, -2.5, 0 },
+							1.5
+						},
+						{
+							{ -0.5, 0.5, 0.8 },
+							{ 0, -7.5, 0 },
+							1.5
+						},
+						{
+							{ -0.5, -7, 0.8 },
+							{ 0, -7.5, 0 },
+							1.5
+						},
+						{
+							{ -0.5, -7, 0.8 },
+							{ 0, -2.5, 0 },
+							1.5
+						},
+						{
+							{ -0.5, -9, 0 },
+							{ 0, -2.5, 0 },
+							1.5
+						},
+						
+					},
+					transportModes = {
+						"PERSON"
+					}
+				}
+			}
+		}
+	},
+	version = 1
+}
+end

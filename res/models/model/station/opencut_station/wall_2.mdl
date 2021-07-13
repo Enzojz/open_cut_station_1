@@ -1,0 +1,54 @@
+function data() return {
+    boundingInfo = {
+       bbMax = { 5.000000, 0.250000, 9.999999 },
+       bbMin = { -5.000000, -0.250000, 0.000000 }
+    },
+    collider = {
+      params = {
+          center = { 0, 0, 0 },
+          halfExtents = { 0, 0, 0 }
+      },
+      type = "BOX"
+    },
+    lods = {
+       {
+          node = {
+             
+             children = {
+                {
+                   materials = { "station/opencut_station/brick_nz.mtl", "station/opencut_station/brick.mtl" },
+                   mesh = "station/opencut_station/wall.msh",
+                   name = "wall",
+                   transf = {
+                      1.000000, 0.000000, 0.000000, 0.000000, 
+                      0.000000, 1.000000, 0.000000, 0.000000, 
+                      0.000000, 0.000000, 1.000000, 0.000000, 
+                      0.000000, 5.000000, 0.000000, 1.000000, 
+                   }
+                },
+                {
+                   materials = { "station/opencut_station/brick_nz.mtl", "station/opencut_station/brick.mtl" },
+                   mesh = "station/opencut_station/wall.msh",
+                   name = "wall",
+                   transf = {
+                      1.000000, 0.000000, 0.000000, 0.000000, 
+                      0.000000, 1.000000, 0.000000, 0.000000, 
+                      0.000000, 0.000000, 1.000000, 0.000000, 
+                      0.000000, -5.000000, 0.000000, 1.000000, 
+                   }
+                }
+            },
+            name = "RootNode",
+            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+            
+          },
+          static = false,
+          visibleFrom = 0,
+          visibleTo = 500
+       }
+    },
+    metadata = {
+ 
+    },
+    version = 1
+ } end

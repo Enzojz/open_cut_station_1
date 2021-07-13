@@ -39,9 +39,22 @@ return {
 			wrapT = "REPEAT",
 			
 		},
+		map_op_1 =
+		{
+			fileName = "models/station/opencut_station/op/nz.dds",
+			magFilter = "LINEAR",
+			minFilter = "LINEAR_MIPMAP_LINEAR",
+		},
+		operation_1 =
+		{
+			op = "MULTIPLICATION",
+			mode = "NORMAL",
+			scale = { 0.2, 0.2 },
+			opacity = -515.0
+		},
 		polygon_offset = {facste = 0, units = 0},
 		two_sided = {twoSided = false}
 	},
-	type = "PHYSICAL_NRML_MAP"
+	type = "PHYSICAL_NRML_MAP_OP"
 }
 end

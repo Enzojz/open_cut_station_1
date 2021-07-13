@@ -33,11 +33,11 @@ local function calcScale(dist, angle)
 		return dist
 	end
 	
-	pi = 3.14159
-	pi2 = pi / 2	
-	sqrt2 = 1.41421
+	local pi = 3.14159
+	local pi2 = pi / 2	
+	local sqrt2 = 1.41421
 	
-	scale = 1.0
+	local scale = 1.0
 	if (angle >= pi2) then 
 		scale = 1.0 + (sqrt2 - 1.0) * ((angle - pi2) / pi2)
 	end
@@ -51,13 +51,13 @@ coor.make = function(input)
 	local result = { }
 	
 	for i = 1, #input do
-		entry = input[i]
+		local entry = input[i]
 	
-		p0 = entry[1]
-		p1 = entry[2]
-		t0 = entry[3]
-		t1 = entry[4]
-		width = entry[5]
+		local p0 = entry[1]
+		local p1 = entry[2]
+		local t0 = entry[3]
+		local t1 = entry[4]
+		local width = entry[5]
 
 		p0 = vec3.new(p0[1], p0[2], p0[3])
 		p1 = vec3.new(p1[1], p1[2], p1[3])
@@ -65,10 +65,10 @@ coor.make = function(input)
 		t0 = vec3.normalize(vec3.new(t0[1], t0[2], t0[3]))
 		t1 = vec3.normalize(vec3.new(t1[1], t1[2], t1[3]))
 		
-		length = vec3.distance(p0, p1)
-		angle = vec3.angleUnit(t0, t1)
+		local length = vec3.distance(p0, p1)
+		local angle = vec3.angleUnit(t0, t1)
 		
-		scale = calcScale(length, angle)
+		local scale = calcScale(length, angle)
 		
 		t0 = vec3.mul(scale, t0)
 		t1 = vec3.mul(scale, t1)
