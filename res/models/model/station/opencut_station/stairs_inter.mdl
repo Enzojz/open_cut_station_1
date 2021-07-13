@@ -1,0 +1,133 @@
+function data()
+    return {
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_inter.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/fence.mtl"
+                            },
+                            mesh = "station/opencut_station/fence_inter.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_side.msh",
+                            transf = { -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, -2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/fence.mtl"
+                            },
+                            mesh = "station/opencut_station/fence_flat_side.msh",
+                            transf = { -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, -2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_side.msh",
+                            transf = { -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/fence.mtl"
+                            },
+                            mesh = "station/opencut_station/fence_flat_side.msh",
+                            transf = { -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1 }
+                        }
+                    },
+                    name = "RootNode",
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                },
+                static = true,
+                visibleFrom = 0,
+                visibleTo = 1000
+            }
+        },
+        metadata = {
+            transportNetworkProvider = {
+                laneLists = {
+                    {
+                        nodes = {
+                            {
+                                { 0, 0, 0 },
+                                { 0.3, 0, 0 },
+                                2.4
+                            },
+                            {
+                                { 0.3, 0, 0 },
+                                { 0.3, 0, 0 },
+                                2.4
+                            },
+                            {
+                                { 0.3, 0, 0 },
+                                { 2.2, 0, 0 },
+                                2.4
+                            },
+                            {
+                                { 2.5, 0, 0 },
+                                { 2.2, 0, 0 },
+                                2.4
+                            },
+                            {
+                                { 0.3, 0, 0 },
+                                { 0, 1.75, 0 },
+                                2.4
+                            },
+                            {
+                                { 0.3, 1.75, 0 },
+                                { 0, 1.75, 0 },
+                                2.4
+                            },
+                            {
+                                { -0.3, 1.75, 0 },
+                                { 0, -1.75, 0 },
+                                2.4
+                            },
+                            {
+                                { -0.3, 0, 0 },
+                                { 0, -1.75, 0 },
+                                2.4
+                            },
+                            {
+                                { 0.3, 0, 0 },
+                                { 0, -0.58309518948453, 0 },
+                                2.4
+                            },
+                            {
+                                { 0, -0.5, 0 },
+                                { 0, -0.58309518948453, 0 },
+                                2.4
+                            },
+                            {
+                                { -0.3, 0, 0 },
+                                { 0, 1.2953092123862, 0 },
+                                2.4
+                            },
+                            {
+                                { 0, -0.5, 0 },
+                                { 0, -1.2953092123862, 0 },
+                                2.4
+                            }
+                        },
+                        transportModes = {
+                            "PERSON"
+                        }
+                    }
+                }
+            }
+        },
+        version = 1
+    }
+end

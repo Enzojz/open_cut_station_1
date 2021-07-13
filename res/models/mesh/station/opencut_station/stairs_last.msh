@@ -1,0 +1,37 @@
+function data() return 
+  { animations = {  }, matConfigs = { { 0, 0 } }, 
+    subMeshes = 
+      { 
+        { 
+          indices = 
+            { 
+              normal = { count = 336, offset = 4896 }, 
+              position = { count = 336, offset = 4896 }, 
+              tangent = { count = 336, offset = 4896 }, 
+              uv0 = { count = 336, offset = 4896 }, 
+             }, 
+          materials = { "station/opencut_station/side_wall.mtl" }
+         }, 
+        { 
+          indices = 
+            { 
+              normal = { count = 72, offset = 5232 }, 
+              position = { count = 72, offset = 5232 }, 
+              tangent = { count = 72, offset = 5232 }, 
+              uv0 = { count = 72, offset = 5232 }, 
+             }, 
+          materials = { "station/opencut_station/stairs_base.mtl" }
+         }
+       }, 
+    vertexAttr = 
+      { 
+        normal = 
+          { count = 1224, numComp = 3, offset = 2040 }, 
+        position = 
+          { count = 1224, numComp = 3, offset = 0 }, 
+        tangent = 
+          { count = 1632, numComp = 4, offset = 3264 }, 
+        uv0 = 
+          { count = 816, numComp = 2, offset = 1224 }, 
+       }
+   } end

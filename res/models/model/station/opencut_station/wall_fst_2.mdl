@@ -1,0 +1,35 @@
+function data()
+    return {
+        collider = {
+            params = {
+                center = { 0, 0, 0 },
+                halfExtents = { 0, 0, 0 }
+            },
+            type = "BOX"
+        },
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = {
+                                "station/opencut_station/concrete.mtl"
+                            },
+                            mesh = "station/opencut_station/oc_wall_prism.msh",
+                            transf = { 0.5, 0, 0, 0, 0, -10, 0, 0, 0, 0, 10, 0, 0, 0, 0, 1 }
+                        }
+                    },
+                    name = "RootNode",
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                },
+                static = true,
+                visibleFrom = 0,
+                visibleTo = 1000
+            }
+        },
+        metadata = {
+            cost = { price = 10000 }
+        },
+        version = 1
+    }
+end

@@ -1,0 +1,54 @@
+function data()
+    return {
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_int.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_int.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_int.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_int.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/opencut_station/side_wall.mtl"
+                            },
+                            mesh = "station/opencut_station/stairs_flat_int.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1 }
+                        }
+                    },
+                    name = "RootNode",
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                },
+                static = true,
+                visibleFrom = 0,
+                visibleTo = 1000
+            }
+        },
+        metadata = {  },
+        version = 1
+    }
+end

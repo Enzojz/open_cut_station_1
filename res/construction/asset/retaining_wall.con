@@ -1,6 +1,6 @@
-local coor = require("opencut/coor")
-local func = require("opencut/func")
-local pipe = require("opencut/pipe")
+local coor = require("opencut_station/coor")
+local func = require("opencut_station/func")
+local pipe = require("opencut_station/pipe")
 
 local wallSegs = {1, 2, 3, 4, 5}
 local wallLength = 10
@@ -15,10 +15,10 @@ local newModel = function(m, ...)
     }
 end
 
-local rWall = "station/train/passenger/opencut/wall_10_2.mdl"
-local lWall = "station/train/passenger/opencut/wall_lst_2.mdl"
-local fWall = "station/train/passenger/opencut/wall_fst_2.mdl"
-local paving = "station/train/passenger/opencut/paving_base.mdl"
+local rWall = "station/opencut_station/wall_10_2.mdl"
+local lWall = "station/opencut_station/wall_lst_2.mdl"
+local fWall = "station/opencut_station/wall_fst_2.mdl"
+local paving = "station/opencut_station/paving_base.mdl"
 local tWalls = {lWall, fWall}
 
 function data()

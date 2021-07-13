@@ -1,0 +1,35 @@
+function data()
+    return {
+        collider = {
+            params = {
+                center = { 0, 0, 0 },
+                halfExtents = { 0, 0, 0 }
+            },
+            type = "BOX"
+        },
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = {
+                                "station/opencut_station/paving.mtl"
+                            },
+                            mesh = "station/opencut_station/paving_base.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                        }
+                    },
+                    name = "RootNode",
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                },
+                static = true,
+                visibleFrom = 0,
+                visibleTo = 5000
+            }
+        },
+        metadata = {
+            cost = { price = 0 }
+        },
+        version = 1
+    }
+end

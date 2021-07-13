@@ -1,0 +1,31 @@
+function data() return 
+  { animations = {  }, matConfigs = { { 0 } }, 
+    subMeshes = 
+      { 
+        { 
+          indices = 
+            { 
+              normal = 
+                { count = 3168, offset = 38016 }, 
+              position = 
+                { count = 3168, offset = 38016 }, 
+              tangent = 
+                { count = 3168, offset = 38016 }, 
+              uv0 = 
+                { count = 3168, offset = 38016 }, 
+             }, 
+          materials = { "station/opencut_station/fence.mtl" }
+         }
+       }, 
+    vertexAttr = 
+      { 
+        normal = 
+          { count = 9504, numComp = 3, offset = 15840 }, 
+        position = 
+          { count = 9504, numComp = 3, offset = 0 }, 
+        tangent = 
+          { count = 12672, numComp = 4, offset = 25344 }, 
+        uv0 = 
+          { count = 6336, numComp = 2, offset = 9504 }, 
+       }
+   } end

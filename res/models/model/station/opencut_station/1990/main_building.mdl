@@ -1,0 +1,211 @@
+function data()
+    return {
+        collider = {
+            params = {  },
+            type = "MESH"
+        },
+        lods = {
+            {
+                animations = {  },
+                events = {  },
+                node = {
+                    children = {
+                        {
+                            materials = {
+                                "station/train/passenger/trainstation_1990_borders_2.mtl",
+                                "station/train/passenger/trainstation_1990_details_1.mtl",
+                                "station/train/passenger/trainstation_1990_roof_2.mtl",
+                                "station/train/passenger/trainstation_1990_wall_2.mtl",
+                                "station/train/passenger/trainstation_1990_window_2.mtl"
+                            },
+                            mesh = "station/train/passenger/1990/lod_0_station_small_repeat.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/train/passenger/trainstation_1990_doors_and_windows_1.mtl",
+                                "station/train/passenger/trainstation_1990_roof_2.mtl",
+                                "station/train/passenger/trainstation_1990_wall_2.mtl",
+                                "station/train/passenger/trainstation_1990_window_2.mtl"
+                            },
+                            mesh = "station/train/passenger/1990/lod_0_station_small.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/train/passenger/trainstation_1990_doors_and_windows_1.mtl",
+                                "station/train/passenger/trainstation_1990_roof_2.mtl",
+                                "station/train/passenger/trainstation_1990_wall_2.mtl",
+                                "station/train/passenger/trainstation_1990_window_2.mtl"
+                            },
+                            mesh = "station/train/passenger/1990/lod_0_station_small.msh",
+                            transf = { -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/train/passenger/trainstation_1990_details_1.mtl"
+                            },
+                            mesh = "station/train/passenger/1990/lod_0_trashcan.msh",
+                            transf = { 6.1230317691119e-017, 1, -0, 0, -1, 6.1230317691119e-017, 0, 0, 0, 0, 1, 0, 4, -4.7, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "station/train/passenger/trainstation_1990_details_1.mtl"
+                            },
+                            mesh = "station/train/passenger/1990/lod_0_single_chair.msh",
+                            transf = { 6.1230317691119e-017, 1, -0, 0, -1, 6.1230317691119e-017, 0, 0, 0, 0, 1, 0, -4, -4.7, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "asset/tree_bed_mat.mtl"
+                            },
+                            mesh = "asset/tree_bed_new_lod_0.msh",
+                            transf = { 6.1230317691119e-017, 1, -0, 0, -1, 6.1230317691119e-017, 0, 0, 0, 0, 1, 0, -7, -8, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "asset/tree_bed_mat.mtl"
+                            },
+                            mesh = "asset/tree_bed_new_lod_0.msh",
+                            transf = { 6.1230317691119e-017, 1, -0, 0, -1, 6.1230317691119e-017, 0, 0, 0, 0, 1, 0, 7, -8, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "asset/tree_bed_mat.mtl"
+                            },
+                            mesh = "asset/tree_bed_new_lod_0.msh",
+                            transf = { 1, 0, -0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -8, 0, 0, 1 }
+                        },
+                        {
+                            materials = {
+                                "asset/tree_bed_mat.mtl"
+                            },
+                            mesh = "asset/tree_bed_new_lod_0.msh",
+                            transf = { 1, 0, -0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 8, 0, 0, 1 }
+                        }
+                    },
+                    name = "RootNode",
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 3530
+            }
+        },
+        metadata = {
+            transportNetworkProvider = {
+                laneLists = {
+                    {
+                        linkable = true,
+                        nodes = {
+                            {
+                                { 0.5, 4.5, 0.8 },
+                                { 0, -1.802775637732, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 3, 0.8 },
+                                { 0, -1.802775637732, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 3, 0.8 },
+                                { 0, -1.2806248474866, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 2, 0 },
+                                { 0, -1.2806248474866, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 2, 0 },
+                                { 0, -1, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 1, 0 },
+                                { 0, -1, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, 1, 0 },
+                                { 0, -9, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, -8, 0 },
+                                { 0, -9, 0 },
+                                1.5
+                            },
+                            {
+                                { -0.5, 4.5, 0.8 },
+                                { 0, -1.802775637732, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 3, 0.8 },
+                                { 0, -1.802775637732, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 3, 0.8 },
+                                { 0, -1.2806248474866, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 2, 0 },
+                                { 0, -1.2806248474866, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 2, 0 },
+                                { 0, -1, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 1, 0 },
+                                { 0, -1, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, 1, 0 },
+                                { 0, -9, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, -8, 0 },
+                                { 0, -9, 0 },
+                                1.5
+                            },
+                            {
+                                { 1.5, -8, 0 },
+                                { 3.75, 0, 0 },
+                                1.5
+                            },
+                            {
+                                { 4.5, -10.25, 0 },
+                                { 3.75, 0, 0 },
+                                1.5
+                            },
+                            {
+                                { -1.5, -8, 0 },
+                                { -3.75, 0, 0 },
+                                1.5
+                            },
+                            {
+                                { -4.5, -10.25, 0 },
+                                { -3.75, 0, 0 },
+                                1.5
+                            }
+                        },
+                        transportModes = {
+                            "PERSON"
+                        }
+                    }
+                }
+            }
+        },
+        version = 1
+    }
+end
