@@ -1,0 +1,233 @@
+local coor = require("opencut_station/coor")
+local func = require("opencut_station/func")
+local pipe = require("opencut_station/pipe")
+
+local wallSegs = {1, 2, 3, 4, 5}
+local wallLength = 10
+local wallHeights = func.seqMap({1, 200}, function(h) return h * 0.1 end)
+local rampHeights = func.seqMap({-50, 50}, function(h) return h * 0.1 end)
+local thickness = func.seqMap({0, 40}, function(w) return 0.5 + w * 0.1 end)
+local slopes = func.seq(-70, 70)
+local distances = func.seqMap({-10, 100}, function(d) return d * 0.1 end)
+local narrowings = func.seqMap({-20, 20}, function(n) return n * 0.1 end)
+
+local newModel = function(m, ...)
+    return {
+        id = m,
+        transf = coor.mul(...)
+    }
+end
+
+local paving = "station/opencut_station/paving_base.mdl"
+
+function data()
+    
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("MENU_WALL_NAME"),
+            description = _("MENU_WALL_DESC")
+        },
+        availability = {
+            yearFrom = 1850
+        },
+        buildMode = "MULTI",
+        categories = {"misc"},
+        order = 100,
+        skipCollision = true,
+        autoRemovable = false,
+        
+        params = {
+            {
+                key = "wallType",
+                name = _("MENU_WALL_STYLE"),
+                values = {
+                    "ui/construction/station/opencut_station/concrete.tga",
+                    "ui/construction/station/opencut_station/brick.tga",
+                    "ui/construction/station/opencut_station/brick_2.tga"
+                },
+                uiType = "ICON_BUTTON",
+                defaultIndex = 0
+            },
+            {
+                key = "wallLength",
+                name = _("MENU_WALL_LENGTH"),
+                values = func.map(wallSegs, function(n) return tostring(n * wallLength) end),
+            },
+            {
+                key = "hWall",
+                name = _("MENU_WALL_HEIGHT"),
+                uiType = "SLIDER",
+                values = func.map(wallHeights, tostring),
+                defaultIndex = 50
+            },
+            {
+                key = "hRamp",
+                name = _("MENU_WALL_RAMP"),
+                uiType = "SLIDER",
+                values = func.map(rampHeights, tostring),
+                defaultIndex = 49
+            },
+            {
+                key = "slope",
+                name = _("MENU_WALL_SLOPE"),
+                uiType = "SLIDER",
+                values = func.map(slopes, tostring),
+                defaultIndex = 70
+            },
+            {
+                key = "narrowing",
+                name = _("MENU_WALL_NARROWING"),
+                uiType = "SLIDER",
+                values = func.map(narrowings, tostring),
+                defaultIndex = 20
+            },
+            {
+                key = "offset",
+                name = _("MENU_WALL_TRACK_DISTANCE"),
+                uiType = "SLIDER",
+                values = func.map(distances, tostring),
+                defaultIndex = 10
+            },
+            {
+                key = "aligned",
+                name = _("MENU_WALL_TERRAIN"),
+                values = {_("No"), _("Yes")},
+                defaultIndex = 1
+            },
+            {
+                key = "thickness",
+                name = _("MENU_WALL_THICKNESS"),
+                uiType = "SLIDER",
+                values = func.map(thickness, tostring),
+                defaultIndex = 0
+            }
+        },
+        
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {}
+                    }
+                },
+                groundFaces = {}
+            }
+            
+            local fWall = ("station/opencut_station/wall_%d_10.mdl"):format(params.wallType + 1)
+            local lWall = ("station/opencut_station/wall_%d_ramp.mdl"):format(params.wallType + 1)
+            local rWall = ("station/opencut_station/wall_%d_ramp_2.mdl"):format(params.wallType + 1)
+            
+            local nSeg = wallSegs[params.wallLength + 1]
+            
+            local rampHeight = rampHeights[params.hRamp + 1] / nSeg
+            local rampLeft = rampHeight < 0
+            local rampWall = rampLeft and lWall or rWall
+            rampHeight = rampHeight < 0 and -rampHeight or rampHeight
+            
+            local baseHeight = wallHeights[params.hWall + 1]
+            rampHeight = rampHeight > baseHeight and baseHeight or rampHeight
+            
+            local thickness = thickness[params.thickness + 1]
+            local narrowing = narrowings[params.narrowing + 1]
+            local yScale = thickness / 0.5
+            
+            local slope = slopes[params.slope + 1] * 0.001
+            local distance = distances[params.offset + 1]
+            
+            local mShear = coor.shearZoX(slope) * coor.shearYoX(narrowing / (nSeg * 10)) * coor.transY(narrowing * 0.5)
+            local offsetY = -distance - 2.5 - thickness * 0.5
+            local mOffset = coor.transY(offsetY)
+            
+            for i = 1, nSeg do
+                local height = baseHeight - rampHeight * (rampLeft and i or (nSeg - i + 1))
+                local baseScale = coor.xyz(1, yScale, height / 10)
+                local mOffset = coor.xyz((-nSeg * 0.5 + (i - 0.5)) * 10, offsetY, 0.3)
+                if (baseHeight > 0) then
+                    table.insert(result.models, newModel(fWall, coor.rotZ(0.5 * math.pi), coor.scale(baseScale), mShear, coor.trans(mOffset)))
+                end
+                if rampHeight > 0 then
+                    local rampScale = coor.xyz(1, yScale, rampHeight / 10)
+                    local rampOffset = mOffset + coor.xyz(0, 0, height)
+                    table.insert(result.models, newModel(rampWall, coor.rotZ(0.5 * math.pi), coor.scale(rampScale), mShear, coor.trans(rampOffset)))
+                end
+                
+                if (params.aligned == 1) then
+                    table.insert(
+                        result.models,
+                        newModel(paving, coor.rotZ(0.5 * math.pi), coor.transY(0.5), coor.scale(coor.xyz(2, distance + 2.5 + math.abs(narrowing), 1)), mShear, coor.trans(mOffset))
+                )
+                end
+            end
+            
+            if (params.aligned == 1) then
+                local totalLength = nSeg * 10
+                local ptA = coor.xyz(totalLength * 0.5, 0, baseHeight - (rampLeft and 0 or rampHeight)) .. mShear * mOffset
+                local ptB = coor.xyz(-totalLength * 0.5, 0, baseHeight - (rampLeft and rampHeight or 0)) .. mShear * mOffset
+                local extWidth = 2 * baseHeight
+                local top = {
+                    ptB + coor.xyz(0, 0, 0),
+                    ptB + coor.xyz(0, -extWidth, 0),
+                    ptA + coor.xyz(0, -extWidth, 0),
+                    ptA + coor.xyz(0, 0, 0)
+                }
+                local slot = {
+                    ptB + coor.xyz(0, 3, 0),
+                    ptB + coor.xyz(0, -0.5, 0),
+                    ptA + coor.xyz(0, -0.5, 0),
+                    ptA + coor.xyz(0, 3, 0)
+                }
+                local extB = (ptB.z + 10)
+                local slopeB = {
+                    ptB + coor.xyz(-extB, 0, -ptB.z - 10),
+                    ptB + coor.xyz(-extB, -extWidth - extB, -ptB.z - 10),
+                    ptB + coor.xyz(0, -extWidth, 0),
+                    ptB + coor.xyz(0, 0, 0),
+                }
+                local extA = (ptA.z + 10)
+                local slopeA = {
+                    ptA + coor.xyz(0, 0, 0),
+                    ptA + coor.xyz(0, -extWidth, 0),
+                    ptA + coor.xyz(extA, -extWidth - extA, -ptA.z - 10),
+                    ptA + coor.xyz(extA, 0, -ptA.z - 10),
+                }
+                local slopeC = {
+                    ptA + coor.xyz(0, -extWidth, 0),
+                    ptA + coor.xyz(extA, -extWidth - extA, -ptA.z - 10),
+                    ptB + coor.xyz(-extB, -extWidth - extB, -ptB.z - 10),
+                    ptB + coor.xyz(0, -extWidth, 0)
+                }
+                
+                result.groundFaces = {{face = func.map(slot, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}}}
+                result.terrainAlignmentLists = {
+                    {
+                        type = "GREATER",
+                        faces = {
+                            func.map(top, coor.vec2Tuple),
+                            func.map(slopeA, coor.vec2Tuple),
+                            func.map(slopeB, coor.vec2Tuple),
+                            func.map(slopeC, coor.vec2Tuple)
+                        },
+                        slopeLow = 1e5,
+                        slopeHigh = 1e5,
+                    },
+                    {
+                        type = "EQUAL",
+                        faces = {}
+                    }
+                }
+            else
+                result.terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {}
+                    }
+                }
+            end
+            return result
+        end
+    }
+
+end

@@ -4,17 +4,13 @@ local pipe = require "opencut_station/pipe"
 local coor = require "opencut_station/coor"
 local trackEdge = require "opencut_station/trackedge"
 local station = require "opencut_station/stationlib"
+local colliderutil = require "colliderutil"
 
 local platformSegments = {2, 4, 8, 12, 16, 20, 24}
 local heightList = {-8, -10, -12}
 local trackNumberList = {2, 3, 4, 5, 6, 7, 8, 10, 12}
 
 local tramType = {"NO", "YES", "ELECTRIC"}
-local streetProfile = {
-    {5.75, "standard/town_small_new.lua"},
-    {7.75, "standard/town_medium_new.lua"},
-    {11.75, "standard/town_large_new.lua"}
-}
 
 local platforms = {
     {
@@ -189,7 +185,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                             function(f, t) return {
                                 edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)),
                                 snap = {false, false},
-                                align = true,
+                                align = false,
                                 canFree = false
                             } end)
                         end
@@ -353,7 +349,7 @@ local function params()
         },
         {
             key = "platformHeight",
-            name = _("MENU_DEPTH") .. "(m)",
+            name = _("MENU_DEPTH"),
             values = func.map(func.map(heightList, math.floor), tostring),
             defaultIndex = 0
         },
@@ -400,14 +396,17 @@ local function params()
             values = {_("S"), _("M"), _("L")},
             defaultIndex = 0
         },
-        paramsutil.makeTramTrackParam1(),
-        paramsutil.makeTramTrackParam2(),
         {
-            key = "freeNodes",
-            name = _("MENU_FREENODE"),
-            values = {_("No"), _("Yes"), ("MENU_NO_BUILD")},
-            defaultIndex = 0
+            key = "tramTrack",
+            name = _("MENU_TRAM"),
+            values = { _("No"), _("Yes"), _("Electric") },
         }
+        -- {
+        --     key = "freeNodes",
+        --     name = _("MENU_FREENODE"),
+        --     values = {_("No"), _("Yes"), ("MENU_NO_BUILD")},
+        --     defaultIndex = 0
+        -- }
     }
 end
 
@@ -470,12 +469,12 @@ local function updateFn(params, closureParams)
     local nbTracks = trackNumberList[params.nbTracks + 1]
     local height = heightList[params.platformHeight + 1]
     local tramTrack = tramType[params.tramTrack + 1]
-
+    
     
     local streetType, streetWidth = table.unpack(closureParams.streetList[params.streetType + 1])
     streetWidth = (streetWidth - 0.5) * 0.5
-    -- local streetWidth, streetType = table.unpack(streetProfile[params.streetType + 1])
     
+    -- local streetWidth, streetType = table.unpack(streetProfile[params.streetType + 1])
     local stairs = stairsConfig[params.platformHeight + 1]
     local overpassEntry = params.overpassEntry == 1
     
@@ -572,12 +571,16 @@ local function updateFn(params, closureParams)
     local fHouse = station.surfaceOf(table.unpack(sizeHouse))
     
     result.groundFaces = {
-        {face = fBase, modes = {{type = "FILL", key = "industry_gravel_small_01.lua"}}},
-        {face = fBase, modes = {{type = "STROKE_OUTER", key = "building_paving.lua"}}},
-        {face = fHouse, modes = {{type = "FILL", key = "industry_gravel_small_01.lua"}}},
-        {face = fHouse, modes = {{type = "STROKE_OUTER", key = "building_paving.lua"}}},
+        {face = fBase, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
+        {face = fBase, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
+        {face = fHouse, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
+        {face = fHouse, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
         {face = fSlot1, modes = {{type = "FILL", key = "hole.lua"}}},
         {face = fSlot2, modes = {{type = "FILL", key = "hole.lua"}}},
+    }
+    
+    result.colliders = {
+        colliderutil.createBox({(xMin + xMax) * 0.5, (yMin + yMax) * 0.5, 0.5 * height}, {(xMax - xMin) * 0.5, (yMax - yMin) * 0.5, -height * 0.5})
     }
     
     result.terrainAlignmentLists = {
