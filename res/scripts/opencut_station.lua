@@ -186,13 +186,13 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                                 edge = station.toEdge(coor.xyz(f, pos, 0.8), coor.xyz(t - f, 0, 0)),
                                 snap = {false, false},
                                 align = false,
-                                canFree = false
+                                canFree = canFree
                             } end)
                         end
-                        + station.toEdges(coor.xyz(xposA, pos, 0.8), coor.xyz(-1.5 * w, 0, 0))
-                        * pipe.map2({{false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = false} end)
+                        + station.toEdges(coor.xyz(xposA - 1.5 * w, pos, 0.8), coor.xyz(1.5 * w, 0, 0))
+                        * pipe.map2({{not canFree, false}}, function(e, s) return {edge = e, snap = s, align = true, canFree = canFree} end)
                         + station.toEdges(coor.xyz(xposB, pos, 0.8), coor.xyz(1.5 * w, 0, 0))
-                        * pipe.map2({{false, true}}, function(e, s) return {edge = e, snap = s, align = true, canFree = false} end)
+                        * pipe.map2({{false, not canFree}}, function(e, s) return {edge = e, snap = s, align = true, canFree = canFree} end)
                 end)
         
         local alignedEdges = edges * pipe.filter(function(e) return e.align and e.canFree ~= nil end)
@@ -215,7 +215,7 @@ local makeBuilders = function(config, xOffsets, uOffsets)
         }
     end
     
-    local buildPass = function(pos, hasEntry, config)
+    local buildPass = function(pos, walkLaneWidth, hasEntry, config)
         return func.mapFlatten(pos, function(p)
             local pos, f, t = retrivePos(p)
             return
@@ -257,6 +257,8 @@ local makeBuilders = function(config, xOffsets, uOffsets)
                     and {
                         newModel(config.passEntry, pos > 0 and coor.I() or coor.rotZ(math.pi),
                             coor.trans(coor.xyz(offset.x, pos > 0 and t - 2.75 or f + 2.75, 0))),
+                        newModel(config.passEntryLinker, coor.scaleY(walkLaneWidth), pos > 0 and coor.I() or coor.rotZ(math.pi),
+                            coor.trans(coor.xyz(offset.x, pos > 0 and t - 2.75 + 4 or f + 2.75 - 4, 0))),
                         pos > 0
                         and newModel(stairModels.side.model, coor.trans(coor.xyz(offset.x, f - 0.5, zOffset)))
                         or newModel(stairModels.side.model, coor.rotZ(math.pi) * coor.trans(coor.xyz(offset.x, t + 0.5, zOffset)))
@@ -400,13 +402,13 @@ local function params()
             key = "tramTrack",
             name = _("MENU_TRAM"),
             values = { _("No"), _("Yes"), _("Electric") },
+        },
+        {
+            key = "freeNodes",
+            name = _("MENU_FREENODE"),
+            values = {_("No"), _("Yes"), _("MENU_NO_BUILD")},
+            defaultIndex = 0
         }
-        -- {
-        --     key = "freeNodes",
-        --     name = _("MENU_FREENODE"),
-        --     values = {_("No"), _("Yes"), ("MENU_NO_BUILD")},
-        --     defaultIndex = 0
-        -- }
     }
 end
 
@@ -426,7 +428,8 @@ local function updateFn(params, closureParams)
     
     local config = func.with(
         {
-            passEntry = "station/opencut_station/pass_entry.mdl",
+            passEntry = params.platformEra == 2 and "station/opencut_station/pass_entry.mdl" or "station/opencut_station/pass_entry_2.mdl",
+            passEntryLinker = "station/opencut_station/pass_entry_unit.mdl",
             paving = "station/opencut_station/paving_base.mdl",
         }
         , platforms[params.platformEra + 1])
@@ -462,7 +465,6 @@ local function updateFn(params, closureParams)
     local trackList = closureParams.trackList
     local trackType = trackList[params.trackType + 1]
     
-    -- local trackType = ({"standard.lua", "high_speed.lua"})[params.trackType + 1]
     local catenary = params.catenary == 1
     local nSeg = platformSegments[params.length + 1]
     local length = nSeg * station.segmentLength
@@ -471,10 +473,9 @@ local function updateFn(params, closureParams)
     local tramTrack = tramType[params.tramTrack + 1]
     
     
-    local streetType, streetWidth = table.unpack(closureParams.streetList[params.streetType + 1])
+    local streetType, streetWidth, walkLaneWidth = table.unpack(closureParams.streetList[params.streetType + 1])
     streetWidth = (streetWidth - 0.5) * 0.5
     
-    -- local streetWidth, streetType = table.unpack(streetProfile[params.streetType + 1])
     local stairs = stairsConfig[params.platformHeight + 1]
     local overpassEntry = params.overpassEntry == 1
     
@@ -525,7 +526,7 @@ local function updateFn(params, closureParams)
         + (func.contains({1, 3}, params.overpass) and {{-x(), streetWidth}} or {})
         + (func.contains({2, 3}, params.overpass) and {{x(), streetWidth}} or {})
     
-    local sideEdges = buildSidePasses(streetWidth, streetType, tramTrack, overpasses, ({false, true, nil})[params.freeNodes + 1])
+    local sideEdges = params.freeNodes ~= 2 and buildSidePasses(streetWidth, streetType, tramTrack, overpasses, ({false, true})[params.freeNodes + 1]) or {}
     local railEdges = pipe.new + normal + ext1 + ext2
     result.edgeLists = pipe.new
         + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
@@ -557,7 +558,7 @@ local function updateFn(params, closureParams)
         + paving
         + buildAllStairs()
         + buildFences(nSeg, overpasses / {0, 1})
-        + buildPass(overpasses, overpassEntry, config)
+        + buildPass(overpasses, walkLaneWidth, overpassEntry, config)
         + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 0.5))}
         + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
     

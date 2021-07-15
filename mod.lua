@@ -20,37 +20,37 @@ function data()
         postRunFn = function(settings, params)
             local tracks = api.res.trackTypeRep.getAll()
             local trackList = {}
-            local trackIconList = {}
             local trackNames = {}
             for __, trackName in pairs(tracks) do
                 local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
                 local pos = #trackList + 1
-                if trackName == "standard.lua" then 
+                if trackName == "standard.lua" then
                     pos = 1
-                elseif trackName == "high_speed.lua" then 
+                elseif trackName == "high_speed.lua" then
                     pos = trackList[1] == "standard.lua" and 2 or 1
                 end
                 table.insert(trackList, pos, trackName)
-                table.insert(trackIconList, pos, track.icon)
                 table.insert(trackNames, pos, track.name)
             end
-
+            
             
             local streets = api.res.streetTypeRep.getAll()
-            local streetIconList = {}
-            local streetList = {}
-            local streetNames = {}
+            local streetList = {
+                {}, {}, {}, {}
+            }
+
             for __, streetName in pairs(streets) do
                 local street = api.res.streetTypeRep.get(api.res.streetTypeRep.find(streetName))
-                if (#street.categories > 0 and not streetName:match("street_depot/") and not streetName:match("street_station/")) then
-                    local nBackward = #func.filter(street.laneConfigs, function(l) return (l.forward == false) end)
-                    if (nBackward ~= #street.laneConfigs) then
-                        table.insert(streetIconList, street.icon)
-                        table.insert(streetList, {streetName, street.streetWidth + street.sidewalkWidth * 2})
-                        table.insert(streetNames, street.name)
-                    end
+                if (#street.categories > 0 and not streetName:match("street_depot/") and not streetName:match("street_station/")) then 
+                    local nBackward = #(func.filter(street.laneConfigs, function(l) return (l.forward == false) end))
+                    local isOneWay = nBackward == #street.laneConfigs or nBackward == 0
+                    table.insert(streetList[(street.country and 2 or 0) + (isOneWay and 2 or 1)], {streetName, street.streetWidth + street.sidewalkWidth * 2, street.sidewalkWidth * 0.5, street.name})
                 end
             end
+            local dump = require "luadump"
+            dump()(streetList)
+            streetList = func.flatten(streetList)
+            local streetNames = func.map(streetList, function(s) return s[4] end)
             
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/opencut_station.con"))
             for i = 1, #con.params do
@@ -73,7 +73,6 @@ function data()
             con.updateScript.params = {
                 trackList = trackList,
                 streetList = streetList,
-                trackIconList = trackIconList
             }
         end
     }

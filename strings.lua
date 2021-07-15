@@ -1,4 +1,7 @@
 local descEn = [[This is the opencut station convert and improved from mod for Tpf1 with the same name. Some improvements are done with the features of the game.
+
+** "Shader Enhancement" is required by this mod.
+
 Original Features:
 * From 2 to 12 tracks
 * From 40m to 480m platform lengths
@@ -16,6 +19,9 @@ Improvements:
 ]]
 
 local descFr = [[Ce mod est une conversion puis amélioration du mod de même nom de Tpf1.
+
+** "Shader Enhancement" requis
+
 Caractéristiques originals :
 * Longueur de plateformes de 40m jusqu'à 480m
 * De 2 jusqu'à 12 voies
@@ -33,11 +39,14 @@ Améliorations:
 ]]
 
 local descSc = [[本模组由Tpf1同名模组转换而来，并且利用Tpf2的游戏特性做出了一些改进
+
+** 本模组需要“着色器增强”模组的支持
+
 原特点：
 * 站台长度从40米到480米
 * 二至十二条股道
 * 多种街道和有轨电车选项
-* 带有护土墙建造工具
+* 带有挡土墙建造工具
 
 改进内容:
 * 可以选择所有的第三方轨道
@@ -50,22 +59,24 @@ local descSc = [[本模组由Tpf1同名模组转换而来，并且利用Tpf2的�
 ]]
 
 
-local descTc = [[本模组由Tpf1同名模组转换而来，并且利用Tpf2的游戏特性做出了一些改进
-原特点：
-* 站台长度从40米到480米
-* 二至十二条股道
-* 多种街道和有轨电车选项
-* 带有护土墙建造工具
+local descTc = [[本模組由Tpf1同名模組轉換而來，並且利用Tpf2的遊戲特性做出了一些改進
 
-改进内容:
-* 可以选择所有的第三方轨道
-* 可以选择游戏中任意道路类型作为过街天桥
-* 利用游戏的自动连接功能简化了选项，但给玩家获得了更高的自由度
-* 更好的材质
-* 可以选择的车站入口
-* 可以选择的挡土墙风格
-* 可以选择的站台类型
-]]
+** 本模組需要“著色器增強”模組的支持
+
+原特點：
+* 月臺長度從40米到480米
+* 二至十二條股道
+* 多種街道和有軌電車選項
+* 帶有護土牆建造工具
+
+改進內容:
+* 可以選擇所有的協力廠商軌道
+* 可以選擇遊戲中任意道路類型作為過街天橋
+* 利用遊戲的自動連接功能簡化了選項，但給玩家獲得了更高的自由度
+* 更好的材質
+* 可以選擇的車站入口
+* 可以選擇的擋土牆風格
+* 可以選擇的月臺類型]]
 
 function data()
     return {
@@ -102,7 +113,7 @@ function data()
             MENU_WALL_TRACK_DISTANCE = "Distance to track(m)",
             MENU_WALL_THICKNESS      = "Thickness(m)",
             MENU_WALL_TERRAIN        = "Terrain Deformation",
-            MENU_TRAM                = "Tram Tracks"
+            MENU_TRAM                = "Tram Tracks",
         },
         fr = {
             MOD_NAME                 = "Gare dans la trachée ouverte & mur de soutènement",
@@ -140,7 +151,7 @@ function data()
             MENU_TRAM                = "Voie Tram"
         },
         zh_CN = {
-            MOD_NAME                 = "下沉式车站和护土墙",
+            MOD_NAME                 = "下沉式车站和挡土墙",
             MOD_DESC                 = descSc,
             MENU_NAME                = "下沉式车站",
             MENU_DESC                = "一座下沉结构中的车站，可以同时设置平行或者交错的街道。",

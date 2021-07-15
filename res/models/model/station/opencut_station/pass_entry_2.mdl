@@ -9,22 +9,7 @@ function data()
                 animations = {},
                 events = {},
                 node = {
-                    children = {
-                        {
-                            materials = {
-                                "station/road/streetstation/streetstation_1.mtl"
-                            },
-                            mesh = "station/road/streetstation/lod_0_tickets_new_1.msh",
-                            transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 3.5, 0.8, 1}
-                        },
-                        {
-                            materials = {
-                                "station/road/streetstation/streetstation_1.mtl"
-                            },
-                            mesh = "station/road/streetstation/lod_0_tickets_new_1.msh",
-                            transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3, 3.5, 0.8, 1}
-                        }
-                    },
+                    children = {},
                     name = "RootNode",
                     transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
                 },
@@ -83,7 +68,7 @@ function data()
                         transportModes = {
                             "PERSON"
                         }
-                    }
+                    },
                 }
             }
         },
