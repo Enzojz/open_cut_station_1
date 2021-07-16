@@ -2,6 +2,7 @@ local func = require "opencut_station/func"
 function data()
     return {
         info = {
+            minorVersion = 1,
             severityAdd = "NONE",
             severityRemove = "CRITICAL",
             name = _("MOD_NAME"),
@@ -47,8 +48,7 @@ function data()
                     table.insert(streetList[(street.country and 2 or 0) + (isOneWay and 2 or 1)], {streetName, street.streetWidth + street.sidewalkWidth * 2, street.sidewalkWidth * 0.5, street.name})
                 end
             end
-            local dump = require "luadump"
-            dump()(streetList)
+            
             streetList = func.flatten(streetList)
             local streetNames = func.map(streetList, function(s) return s[4] end)
             

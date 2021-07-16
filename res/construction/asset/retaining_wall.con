@@ -2,8 +2,8 @@ local coor = require("opencut_station/coor")
 local func = require("opencut_station/func")
 local pipe = require("opencut_station/pipe")
 
-local wallSegs = {1, 2, 3, 4, 5}
-local wallLength = 10
+local wallSegs = func.seq(1, 10)
+local wallLength = 5
 local wallHeights = func.seqMap({1, 200}, function(h) return h * 0.1 end)
 local rampHeights = func.seqMap({-50, 50}, function(h) return h * 0.1 end)
 local thickness = func.seqMap({0, 40}, function(w) return 0.5 + w * 0.1 end)
@@ -116,9 +116,9 @@ function data()
                 groundFaces = {}
             }
             
-            local fWall = ("station/opencut_station/wall_%d_10.mdl"):format(params.wallType + 1)
-            local lWall = ("station/opencut_station/wall_%d_ramp.mdl"):format(params.wallType + 1)
-            local rWall = ("station/opencut_station/wall_%d_ramp_2.mdl"):format(params.wallType + 1)
+            local fWall = ("station/opencut_station/wall_%d_5.mdl"):format(params.wallType + 1)
+            local lWall = ("station/opencut_station/wall_%d_5_ramp.mdl"):format(params.wallType + 1)
+            local rWall = ("station/opencut_station/wall_%d_5_ramp_2.mdl"):format(params.wallType + 1)
             
             local nSeg = wallSegs[params.wallLength + 1]
             
@@ -137,19 +137,19 @@ function data()
             local slope = slopes[params.slope + 1] * 0.001
             local distance = distances[params.offset + 1]
             
-            local mShear = coor.shearZoX(slope) * coor.shearYoX(narrowing / (nSeg * 10)) * coor.transY(narrowing * 0.5)
+            local mShear = coor.shearZoX(slope) * coor.shearYoX(narrowing / (nSeg * wallLength)) * coor.transY(narrowing * 0.5)
             local offsetY = -distance - 2.5 - thickness * 0.5
             local mOffset = coor.transY(offsetY)
             
             for i = 1, nSeg do
-                local height = baseHeight - rampHeight * (rampLeft and i or (nSeg - i + 1))
-                local baseScale = coor.xyz(1, yScale, height / 10)
-                local mOffset = coor.xyz((-nSeg * 0.5 + (i - 0.5)) * 10, offsetY, 0.3)
+                local height = baseHeight - rampHeight * (rampLeft and (nSeg - i + 1) or i)
+                local baseScale = coor.xyz(1, yScale, height)
+                local mOffset = coor.xyz((-nSeg * 0.5 + (i - 0.5)) * wallLength, offsetY, 0.3)
                 if (baseHeight > 0) then
                     table.insert(result.models, newModel(fWall, coor.rotZ(0.5 * math.pi), coor.scale(baseScale), mShear, coor.trans(mOffset)))
                 end
                 if rampHeight > 0 then
-                    local rampScale = coor.xyz(1, yScale, rampHeight / 10)
+                    local rampScale = coor.xyz(1, yScale, rampHeight)
                     local rampOffset = mOffset + coor.xyz(0, 0, height)
                     table.insert(result.models, newModel(rampWall, coor.rotZ(0.5 * math.pi), coor.scale(rampScale), mShear, coor.trans(rampOffset)))
                 end
@@ -163,9 +163,9 @@ function data()
             end
             
             if (params.aligned == 1) then
-                local totalLength = nSeg * 10
-                local ptA = coor.xyz(totalLength * 0.5, 0, baseHeight - (rampLeft and 0 or rampHeight)) .. mShear * mOffset
-                local ptB = coor.xyz(-totalLength * 0.5, 0, baseHeight - (rampLeft and rampHeight or 0)) .. mShear * mOffset
+                local totalLength = nSeg * wallLength
+                local ptA = coor.xyz(totalLength * 0.5, 0, baseHeight - (rampLeft and 0 or rampHeight * nSeg)) .. mShear * mOffset
+                local ptB = coor.xyz(-totalLength * 0.5, 0, baseHeight - (rampLeft and rampHeight * nSeg or 0)) .. mShear * mOffset
                 local extWidth = 2 * baseHeight
                 local top = {
                     ptB + coor.xyz(0, 0, 0),
