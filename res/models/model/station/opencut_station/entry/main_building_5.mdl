@@ -1,15 +1,9 @@
 function data()
 return {
-	boundingInfo = {
-		bbMax = { 10, 0, 10.147898674011, },
-		bbMin = { -10, -19, -3.9999997625273e-07, },
-	},
 	collider = {
 		params = {
-			halfExtents = { 10, 9.5, 5.0739493370056, },
 		},
-		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
-		type = "BOX",
+		type = "MESH",
 	},
 	lods = {
 		{

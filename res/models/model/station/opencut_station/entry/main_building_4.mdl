@@ -1,8 +1,9 @@
 function data()
     return {
         collider = {
-            params = {  },
-            type = "MESH"
+            params = {
+            },
+            type = "MESH",
         },
         lods = {
             {
