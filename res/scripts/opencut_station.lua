@@ -401,7 +401,7 @@ local function params()
         {
             key = "tramTrack",
             name = _("MENU_TRAM"),
-            values = { _("No"), _("Yes"), _("Electric") },
+            values = {_("No"), _("Yes"), _("Electric")},
         },
         {
             key = "freeNodes",
@@ -424,185 +424,186 @@ local function defaultParams(param)
     param.overpassEntry = param.length < 2 and 0 or param.overpassEntry
 end
 
-local function updateFn(params, closureParams)
-    
-    local config = func.with(
-        {
-            passEntry = params.platformEra == 2 and "station/opencut_station/pass_entry.mdl" or "station/opencut_station/pass_entry_2.mdl",
-            passEntryLinker = "station/opencut_station/pass_entry_unit.mdl",
-            paving = "station/opencut_station/paving_base.mdl",
-        }
-        , platforms[params.platformEra + 1])
-    
-    local platformPatterns = function(n)
-        return pipe.new
-            * func.seq(1, n * 0.5)
-            * pipe.map(function(x) return x % 2 == 0 and config.platformRepeat or config.platformDwlink end)
-            * function(ls) return ls * pipe.rev() + ls end
-            * function(ls) return ls * pipe.with({[1] = config.platformStart, [n] = config.platformEnd}) end
-    end
-    
-    local sideWall = ("station/opencut_station/wall_%d.mdl"):format(params.wallType + 1)
-    local sideWallPatterns = function(n)
-        local sideWalls = func.map(func.seq(1, n), function(i) return sideWall end)
-        return sideWalls
-    end
-    
-    local stationHouse = ("station/opencut_station/entry/main_building_%d.mdl"):format(params.entryType + 1)
-    local sizeHouse = (
-        {
-            {coor.xyz(8, 15, 0), coor.xyz(-7, 0, 0)},
-            {coor.xyz(10, 19, 0), coor.xyz(-8, 0, 0)},
-            {coor.xyz(8, 22, 0), coor.xyz(-7, 0, 0)},
-            {coor.xyz(11, 15, 0), coor.xyz(-7.5, 0, 0)},
-            {coor.xyz(16, 25, 0), coor.xyz(-11, 0, 0)}
-        }
-        )[params.entryType + 1]
-    
-    
-    local result = {}
-    
-    local trackList = closureParams.trackList
-    local trackType = trackList[params.trackType + 1]
-    
-    local catenary = params.catenary == 1
-    local nSeg = platformSegments[params.length + 1]
-    local length = nSeg * station.segmentLength
-    local nbTracks = trackNumberList[params.nbTracks + 1]
-    local height = heightList[params.platformHeight + 1]
-    local tramTrack = tramType[params.tramTrack + 1]
-    
-    
-    local streetType, streetWidth, walkLaneWidth = table.unpack(closureParams.streetList[params.streetType + 1])
-    streetWidth = (streetWidth - 0.5) * 0.5
-    
-    local stairs = stairsConfig[params.platformHeight + 1]
-    local overpassEntry = params.overpassEntry == 1
-    
-    local levels =
-        {
+local function updateFn()
+    return function(params, closureParams)
+        local config = func.with(
             {
-                mz = coor.transZ(height),
-                mr = coor.I(),
-                mdr = coor.I(),
-                id = 1,
-                nbTracks = nbTracks,
-                baseX = 0,
-                ignoreFst = ({true, false, true, false})[params.trackLayout + 1],
-                ignoreLst = (nbTracks % 2 == 0 and {false, false, true, true} or {true, true, false, false})[params.trackLayout + 1],
+                passEntry = params.platformEra == 2 and "station/opencut_station/pass_entry.mdl" or "station/opencut_station/pass_entry_2.mdl",
+                passEntryLinker = "station/opencut_station/pass_entry_unit.mdl",
+                paving = "station/opencut_station/paving_base.mdl",
+            }
+            , platforms[params.platformEra + 1])
+        
+        local platformPatterns = function(n)
+            return pipe.new
+                * func.seq(1, n * 0.5)
+                * pipe.map(function(x) return x % 2 == 0 and config.platformRepeat or config.platformDwlink end)
+                * function(ls) return ls * pipe.rev() + ls end
+                * function(ls) return ls * pipe.with({[1] = config.platformStart, [n] = config.platformEnd}) end
+        end
+        
+        local sideWall = ("station/opencut_station/wall_%d.mdl"):format(params.wallType + 1)
+        local sideWallPatterns = function(n)
+            local sideWalls = func.map(func.seq(1, n), function(i) return sideWall end)
+            return sideWalls
+        end
+        
+        local stationHouse = ("station/opencut_station/entry/main_building_%d.mdl"):format(params.entryType + 1)
+        local sizeHouse = (
+            {
+                {coor.xyz(8, 15, 0), coor.xyz(-7, 0, 0)},
+                {coor.xyz(10, 19, 0), coor.xyz(-8, 0, 0)},
+                {coor.xyz(8, 22, 0), coor.xyz(-7, 0, 0)},
+                {coor.xyz(11, 15, 0), coor.xyz(-7.5, 0, 0)},
+                {coor.xyz(16, 25, 0), coor.xyz(-11, 0, 0)}
+            }
+            )[params.entryType + 1]
+        
+        
+        local result = {}
+        
+        local trackList = closureParams.trackList
+        local trackType = trackList[params.trackType + 1]
+        
+        local catenary = params.catenary == 1
+        local nSeg = platformSegments[params.length + 1]
+        local length = nSeg * station.segmentLength
+        local nbTracks = trackNumberList[params.nbTracks + 1]
+        local height = heightList[params.platformHeight + 1]
+        local tramTrack = tramType[params.tramTrack + 1]
+        
+        
+        local streetType, streetWidth, walkLaneWidth = table.unpack(closureParams.streetList[params.streetType + 1])
+        streetWidth = (streetWidth - 0.5) * 0.5
+        
+        local stairs = stairsConfig[params.platformHeight + 1]
+        local overpassEntry = params.overpassEntry == 1
+        
+        local levels =
+            {
+                {
+                    mz = coor.transZ(height),
+                    mr = coor.I(),
+                    mdr = coor.I(),
+                    id = 1,
+                    nbTracks = nbTracks,
+                    baseX = 0,
+                    ignoreFst = ({true, false, true, false})[params.trackLayout + 1],
+                    ignoreLst = (nbTracks % 2 == 0 and {false, false, true, true} or {true, true, false, false})[params.trackLayout + 1],
+                }
+            }
+        
+        local xOffsets, uOffsets, xuIndex, xParity = station.buildCoors(nSeg)(levels, {}, {}, {}, {})
+        
+        local function resetParity(offset)
+            return {
+                mpt = offset.mpt,
+                mvec = offset.mvec,
+                parity = coor.I(),
+                id = offset.id,
+                x = offset.x
+            }
+        end
+        
+        local normal = station.generateTrackGroups(xOffsets, length)
+        local ext1 = coor.applyEdges(coor.transY(length * 0.5 + 5), coor.I())(station.generateTrackGroups(func.map(xOffsets, resetParity), 10))
+        local ext2 = coor.applyEdges(coor.flipY(), coor.flipY())(ext1)
+        
+        local xMin, xMax, buildAllStairs, buildPass, buildFences, buildSidePasses = makeBuilders(stairs, xOffsets, uOffsets)
+        local yMin = -0.5 * length - 20
+        local yMax = -yMin
+        
+        local x = function()
+            if (not overpassEntry) then
+                return (nSeg / 4 + 0.5) * station.segmentLength
+            else
+                local pos = (nSeg * 0.5) % 2 and (nSeg * 0.5) or (nSeg * 0.5 - 1)
+                return (pos - 1) * station.segmentLength - 1.5 - streetWidth
+            end
+        end
+        
+        local overpasses = pipe.new
+            + (func.contains({1, 3}, params.overpass) and {{-x(), streetWidth}} or {})
+            + (func.contains({2, 3}, params.overpass) and {{x(), streetWidth}} or {})
+        
+        local sideEdges = params.freeNodes ~= 2 and buildSidePasses(streetWidth, streetType, tramTrack, overpasses, ({false, true})[params.freeNodes + 1]) or {}
+        local railEdges = pipe.new + normal + ext1 + ext2
+        result.edgeLists = pipe.new
+            + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
+            + sideEdges
+        
+        local sideWalls =
+            pipe.new
+            * func.seq(0, nSeg)
+            * pipe.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) + 0.5 * station.segmentLength end)
+            * pipe.map2(sideWallPatterns(nSeg + 1), function(y, m) return {y = y, m = m} end)
+            * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 0.45, s.y, height}}, {m = s.m, v = {xMax + 0.45, s.y, height}}} end)
+            * pipe.map(function(s)
+                return newModel(s.m,
+                    coor.scaleZ((-height + 0.8) / 10),
+                    coor.trans(coor.xyz(table.unpack(s.v)))
+            ) end)
+        
+        local paving =
+            pipe.new
+            * func.seq(-1, nSeg * 4 + 2)
+            * pipe.map(function(i) return i * 5 - 0.5 * (5 + length) end)
+            * pipe.mapFlatten(function(s) return {{xMin + 0.1, s, height}, {xMax - 0.1, s, height}} end)
+            * pipe.map(function(s) return newModel(config.paving, coor.trans(coor.xyz(table.unpack(s)))) end)
+        
+        result.models =
+            pipe.new
+            + station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0))
+            + sideWalls
+            + paving
+            + buildAllStairs()
+            + buildFences(nSeg, overpasses / {0, 1})
+            + buildPass(overpasses, walkLaneWidth, overpassEntry, config)
+            + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 0.5))}
+            + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
+        
+        result.terminalGroups = station.makeTerminals(xuIndex)
+        
+        local fBase = station.surfaceOf(coor.xyz(xMax - xMin + 0.5, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
+        local fSlot0 = station.surfaceOf(coor.xyz(xMax - xMin - 1.2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
+        local fSlot1 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMin + 0.6, 0, height))
+        local fSlot2 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMax - 0.6, 0, height))
+        local fOutter = station.surfaceOf(coor.xyz(xMax - xMin + 4, yMax - yMin + 4, 0), coor.xyz((xMax + xMin) * 0.5, 0, 0.8))
+        local fHouse = station.surfaceOf(table.unpack(sizeHouse))
+        
+        result.groundFaces = {
+            {face = fBase, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
+            {face = fBase, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
+            {face = fHouse, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
+            {face = fHouse, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
+            {face = fSlot1, modes = {{type = "FILL", key = "hole.lua"}}},
+            {face = fSlot2, modes = {{type = "FILL", key = "hole.lua"}}},
+        }
+        
+        result.colliders = {
+            colliderutil.createBox({(xMin + xMax) * 0.5, (yMin + yMax) * 0.5, 0.5 * height}, {(xMax - xMin) * 0.5, (yMax - yMin) * 0.5, -height * 0.5})
+        }
+        
+        result.terrainAlignmentLists = {
+            {
+                type = "LESS",
+                faces = {fOutter},
+            },
+            {
+                type = "EQUAL",
+                faces = {fHouse}
+            },
+            {
+                type = "EQUAL",
+                faces = {fSlot0},
+                slopeLow = 1e5,
             }
         }
-    
-    local xOffsets, uOffsets, xuIndex, xParity = station.buildCoors(nSeg)(levels, {}, {}, {}, {})
-    
-    local function resetParity(offset)
-        return {
-            mpt = offset.mpt,
-            mvec = offset.mvec,
-            parity = coor.I(),
-            id = offset.id,
-            x = offset.x
-        }
+        
+        result.cost = 60000 + nbTracks * 24000
+        result.maintenanceCost = result.cost / 6
+        return result
     end
-    
-    local normal = station.generateTrackGroups(xOffsets, length)
-    local ext1 = coor.applyEdges(coor.transY(length * 0.5 + 5), coor.I())(station.generateTrackGroups(func.map(xOffsets, resetParity), 10))
-    local ext2 = coor.applyEdges(coor.flipY(), coor.flipY())(ext1)
-    
-    local xMin, xMax, buildAllStairs, buildPass, buildFences, buildSidePasses = makeBuilders(stairs, xOffsets, uOffsets)
-    local yMin = -0.5 * length - 20
-    local yMax = -yMin
-    
-    local x = function()
-        if (not overpassEntry) then
-            return (nSeg / 4 + 0.5) * station.segmentLength
-        else
-            local pos = (nSeg * 0.5) % 2 and (nSeg * 0.5) or (nSeg * 0.5 - 1)
-            return (pos - 1) * station.segmentLength - 1.5 - streetWidth
-        end
-    end
-    
-    local overpasses = pipe.new
-        + (func.contains({1, 3}, params.overpass) and {{-x(), streetWidth}} or {})
-        + (func.contains({2, 3}, params.overpass) and {{x(), streetWidth}} or {})
-    
-    local sideEdges = params.freeNodes ~= 2 and buildSidePasses(streetWidth, streetType, tramTrack, overpasses, ({false, true})[params.freeNodes + 1]) or {}
-    local railEdges = pipe.new + normal + ext1 + ext2
-    result.edgeLists = pipe.new
-        + {trackEdge.normal(catenary, trackType, false, snapRule(#normal))(railEdges)}
-        + sideEdges
-    
-    local sideWalls =
-        pipe.new
-        * func.seq(0, nSeg)
-        * pipe.map(function(i) return i * station.segmentLength - 0.5 * (station.segmentLength + length) + 0.5 * station.segmentLength end)
-        * pipe.map2(sideWallPatterns(nSeg + 1), function(y, m) return {y = y, m = m} end)
-        * pipe.mapFlatten(function(s) return {{m = s.m, v = {xMin - 0.45, s.y, height}}, {m = s.m, v = {xMax + 0.45, s.y, height}}} end)
-        * pipe.map(function(s)
-            return newModel(s.m,
-                coor.scaleZ((-height + 0.8) / 10),
-                coor.trans(coor.xyz(table.unpack(s.v)))
-        ) end)
-    
-    local paving =
-        pipe.new
-        * func.seq(-1, nSeg * 4 + 2)
-        * pipe.map(function(i) return i * 5 - 0.5 * (5 + length) end)
-        * pipe.mapFlatten(function(s) return {{xMin + 0.1, s, height}, {xMax - 0.1, s, height}} end)
-        * pipe.map(function(s) return newModel(config.paving, coor.trans(coor.xyz(table.unpack(s)))) end)
-    
-    result.models =
-        pipe.new
-        + station.makePlatforms(uOffsets, platformPatterns(nSeg), coor.transZ(0))
-        + sideWalls
-        + paving
-        + buildAllStairs()
-        + buildFences(nSeg, overpasses / {0, 1})
-        + buildPass(overpasses, walkLaneWidth, overpassEntry, config)
-        + {newModel(stationHouse, coor.rotZ(-math.pi * 0.5), coor.transX(xMin - 0.5))}
-        + {newModel(config.passEntry, coor.rotZ(math.pi * 0.5), coor.transX(xMax + 4.75))}
-    
-    result.terminalGroups = station.makeTerminals(xuIndex)
-    
-    local fBase = station.surfaceOf(coor.xyz(xMax - xMin + 0.5, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
-    local fSlot0 = station.surfaceOf(coor.xyz(xMax - xMin - 1.2, yMax - yMin, 0), coor.xyz((xMax + xMin) * 0.5, 0, height))
-    local fSlot1 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMin + 0.6, 0, height))
-    local fSlot2 = station.surfaceOf(coor.xyz(2.5, length + 20, 0), coor.xyz(xMax - 0.6, 0, height))
-    local fOutter = station.surfaceOf(coor.xyz(xMax - xMin + 4, yMax - yMin + 4, 0), coor.xyz((xMax + xMin) * 0.5, 0, 0.8))
-    local fHouse = station.surfaceOf(table.unpack(sizeHouse))
-    
-    result.groundFaces = {
-        {face = fBase, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
-        {face = fBase, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
-        {face = fHouse, modes = {{type = "FILL", key = "shared/gravel_03.gtex.lua"}}},
-        {face = fHouse, modes = {{type = "STROKE_OUTER", key = "street_border.lua"}}},
-        {face = fSlot1, modes = {{type = "FILL", key = "hole.lua"}}},
-        {face = fSlot2, modes = {{type = "FILL", key = "hole.lua"}}},
-    }
-    
-    result.colliders = {
-        colliderutil.createBox({(xMin + xMax) * 0.5, (yMin + yMax) * 0.5, 0.5 * height}, {(xMax - xMin) * 0.5, (yMax - yMin) * 0.5, -height * 0.5})
-    }
-    
-    result.terrainAlignmentLists = {
-        {
-            type = "LESS",
-            faces = {fOutter},
-        },
-        {
-            type = "EQUAL",
-            faces = {fHouse}
-        },
-        {
-            type = "EQUAL",
-            faces = {fSlot0},
-            slopeLow = 1e5,
-        }
-    }
-    
-    result.cost = 60000 + nbTracks * 24000
-    result.maintenanceCost = result.cost / 6
-    return result
 end
 
 return {
@@ -621,5 +622,6 @@ return {
     skipCollision = true,
     autoRemovable = false,
     params = params(),
-    updateFn = updateFn
+    updateFn = updateFn(),
+    update = updateFn()
 }

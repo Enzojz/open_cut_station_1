@@ -2,6 +2,6 @@ local script = require "opencut_station"
 
 function data()
     return {
-        updateFn = script.updateFn
+        updateFn = script.update
     }
 end
