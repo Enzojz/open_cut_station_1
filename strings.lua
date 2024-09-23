@@ -1,7 +1,5 @@
 local descEn = [[This is the opencut station convert and improved from mod for Tpf1 with the same name. Some improvements are done with the features of the game.
 
-** "Shader Enhancement" is required by this mod.
-
 Original Features:
 * From 2 to 12 tracks
 * From 40m to 480m platform lengths
@@ -19,8 +17,6 @@ Improvements:
 ]]
 
 local descFr = [[Ce mod est une conversion puis amélioration du mod de même nom de Tpf1.
-
-** "Shader Enhancement" requis
 
 Caractéristiques originals :
 * Longueur de plateformes de 40m jusqu'à 480m
@@ -40,8 +36,6 @@ Améliorations:
 
 local descSc = [[本模组由Tpf1同名模组转换而来，并且利用Tpf2的游戏特性做出了一些改进
 
-** 本模组需要“着色器增强”模组的支持
-
 原特点：
 * 站台长度从40米到480米
 * 二至十二条股道
@@ -60,8 +54,6 @@ local descSc = [[本模组由Tpf1同名模组转换而来，并且利用Tpf2的�
 
 
 local descTc = [[本模組由Tpf1同名模組轉換而來，並且利用Tpf2的遊戲特性做出了一些改進
-
-** 本模組需要“著色器增強”模組的支持
 
 原特點：
 * 月臺長度從40米到480米
